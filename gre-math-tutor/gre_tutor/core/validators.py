@@ -1,6 +1,6 @@
 """
-数据验证工具
-用于验证 LLM 输出的 JSON 是否符合 schema
+Data Validation Utilities
+Used to validate if JSON output from LLM matches the expected schema
 """
 
 import json
@@ -13,7 +13,7 @@ T = TypeVar('T', bound=BaseModel)
 
 
 class ValidationResult:
-    """验证结果"""
+    """Validation result container"""
     def __init__(self, success: bool, data: Optional[BaseModel] = None, error: Optional[str] = None):
         self.success = success
         self.data = data
@@ -22,56 +22,56 @@ class ValidationResult:
 
 def validate_json_to_model(json_str: str, model_class: Type[T]) -> ValidationResult:
     """
-    将 JSON 字符串验证并转换为 Pydantic 模型
+    Validates and converts a JSON string into a Pydantic model
     
     Args:
-        json_str: JSON 字符串
-        model_class: 目标 Pydantic 模型类
+        json_str: The JSON string to validate
+        model_class: The target Pydantic model class
     
     Returns:
-        ValidationResult 包含成功标志、数据或错误信息
+        ValidationResult containing the success flag, data, or error message
     """
     try:
-        # 尝试解析 JSON
+        # Attempt to parse JSON
         data = json.loads(json_str)
-        # 验证并创建模型实例
+        # Validate and create model instance
         instance = model_class.model_validate(data)
         return ValidationResult(success=True, data=instance)
     except json.JSONDecodeError as e:
-        return ValidationResult(success=False, error=f"JSON 解析失败: {str(e)}")
+        return ValidationResult(success=False, error=f"JSON parsing failed: {str(e)}")
     except ValidationError as e:
-        return ValidationResult(success=False, error=f"Schema 验证失败: {str(e)}")
+        return ValidationResult(success=False, error=f"Schema validation failed: {str(e)}")
 
 
 def validate_dict_to_model(data: dict, model_class: Type[T]) -> ValidationResult:
     """
-    将字典验证并转换为 Pydantic 模型
+    Validates and converts a dictionary into a Pydantic model
     """
     try:
         instance = model_class.model_validate(data)
         return ValidationResult(success=True, data=instance)
     except ValidationError as e:
-        return ValidationResult(success=False, error=f"Schema 验证失败: {str(e)}")
+        return ValidationResult(success=False, error=f"Schema validation failed: {str(e)}")
 
 
 def extract_json_from_text(text: str) -> Optional[str]:
     """
-    从文本中提取 JSON 内容
-    处理 LLM 可能输出的 markdown 代码块
+    Extracts JSON content from text
+    Handles markdown code blocks that may be output by the LLM
     """
     text = text.strip()
     
-    # 尝试找到 JSON 代码块
+    # Try to find JSON code blocks
     if "```json" in text:
         start = text.find("```json") + 7
         end = text.find("```", start)
         if end != -1:
             return text[start:end].strip()
     
-    # 尝试找到普通代码块
+    # Try to find generic code blocks
     if "```" in text:
         start = text.find("```") + 3
-        # 跳过可能的语言标识
+        # Skip potential language identifiers
         if text[start:start+10].strip().startswith('{') or text[start:start+10].strip().startswith('['):
             pass
         else:
@@ -82,11 +82,11 @@ def extract_json_from_text(text: str) -> Optional[str]:
         if end != -1:
             return text[start:end].strip()
     
-    # 尝试直接找 JSON 对象或数组
+    # Try to find JSON objects or arrays directly
     for start_char, end_char in [('{', '}'), ('[', ']')]:
         start = text.find(start_char)
         if start != -1:
-            # 找到匹配的结束符
+            # Find the matching closing character
             depth = 0
             for i, c in enumerate(text[start:]):
                 if c == start_char:
@@ -100,15 +100,15 @@ def extract_json_from_text(text: str) -> Optional[str]:
 
 
 def validate_questions_list(json_str: str) -> ValidationResult:
-    """验证题目列表"""
+    """Validates a list of questions"""
     try:
         extracted = extract_json_from_text(json_str)
         if extracted is None:
-            return ValidationResult(success=False, error="无法从文本中提取 JSON")
+            return ValidationResult(success=False, error="Could not extract JSON from text")
         
         data = json.loads(extracted)
         
-        # 处理单个题目或题目列表
+        # Handle single question object or list of questions
         if isinstance(data, dict):
             if 'questions' in data:
                 questions_data = data['questions']
@@ -117,34 +117,33 @@ def validate_questions_list(json_str: str) -> ValidationResult:
         elif isinstance(data, list):
             questions_data = data
         else:
-            return ValidationResult(success=False, error="JSON 格式不正确：期望对象或数组")
+            return ValidationResult(success=False, error="Invalid JSON format: expected object or array")
         
-        # 验证每个题目
+        # Validate each question
         questions = []
         for q_data in questions_data:
             result = validate_dict_to_model(q_data, Question)
             if result.success:
                 questions.append(result.data)
             else:
-                return ValidationResult(success=False, error=f"题目验证失败: {result.error}")
+                return ValidationResult(success=False, error=f"Question validation failed: {result.error}")
         
         return ValidationResult(success=True, data=questions)
     except json.JSONDecodeError as e:
-        return ValidationResult(success=False, error=f"JSON 解析失败: {str(e)}")
+        return ValidationResult(success=False, error=f"JSON parsing failed: {str(e)}")
 
 
 def validate_solve_result(json_str: str) -> ValidationResult:
-    """验证求解结果"""
+    """Validates solving result"""
     extracted = extract_json_from_text(json_str)
     if extracted is None:
-        return ValidationResult(success=False, error="无法从文本中提取 JSON")
+        return ValidationResult(success=False, error="Could not extract JSON from text")
     return validate_json_to_model(extracted, SolveResult)
 
 
 def validate_diagnose_result(json_str: str) -> ValidationResult:
-    """验证诊断结果"""
+    """Validates diagnosis result"""
     extracted = extract_json_from_text(json_str)
     if extracted is None:
-        return ValidationResult(success=False, error="无法从文本中提取 JSON")
+        return ValidationResult(success=False, error="Could not extract JSON from text")
     return validate_json_to_model(extracted, DiagnoseResult)
-

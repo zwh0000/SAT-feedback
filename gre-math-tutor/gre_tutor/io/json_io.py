@@ -1,6 +1,6 @@
 """
-JSON 输入输出模块
-处理结构化数据的读写
+JSON Input/Output Module
+Handles reading and writing of structured data
 """
 
 import json
@@ -19,16 +19,16 @@ from ..core.models import (
 
 def save_json(data: Any, file_path: str, indent: int = 2) -> None:
     """
-    保存数据到 JSON 文件
+    Saves data to a JSON file
     
     Args:
-        data: 要保存的数据（支持 Pydantic 模型）
-        file_path: 输出路径
-        indent: 缩进空格数
+        data: Data to be saved (supports Pydantic models)
+        file_path: Output file path
+        indent: Number of spaces for indentation
     """
     os.makedirs(os.path.dirname(file_path) or '.', exist_ok=True)
     
-    # 处理 Pydantic 模型
+    # Handle Pydantic models
     if hasattr(data, 'model_dump'):
         data = data.model_dump()
     elif isinstance(data, list):
@@ -40,23 +40,23 @@ def save_json(data: Any, file_path: str, indent: int = 2) -> None:
 
 def load_json(file_path: str) -> Any:
     """
-    从 JSON 文件加载数据
+    Loads data from a JSON file
     
     Args:
-        file_path: 文件路径
+        file_path: File path
     
     Returns:
-        解析后的数据
+        Parsed data
     """
     if not os.path.exists(file_path):
-        raise FileNotFoundError(f"文件不存在: {file_path}")
+        raise FileNotFoundError(f"File not found: {file_path}")
     
     with open(file_path, 'r', encoding='utf-8') as f:
         return json.load(f)
 
 
 def save_transcribed(questions: list[Question], file_path: str) -> None:
-    """保存抽题结果"""
+    """Saves question extraction results"""
     data = {
         "questions": [q.model_dump() for q in questions],
         "total": len(questions),
@@ -66,14 +66,14 @@ def save_transcribed(questions: list[Question], file_path: str) -> None:
 
 
 def load_transcribed(file_path: str) -> list[Question]:
-    """加载抽题结果"""
+    """Loads question extraction results"""
     data = load_json(file_path)
     questions_data = data.get("questions", data) if isinstance(data, dict) else data
     return [Question.model_validate(q) for q in questions_data]
 
 
 def save_solve_results(results: list[SolveResult], file_path: str) -> None:
-    """保存求解结果"""
+    """Saves solving results"""
     data = {
         "solve_results": [r.model_dump() for r in results],
         "total": len(results),
@@ -83,19 +83,19 @@ def save_solve_results(results: list[SolveResult], file_path: str) -> None:
 
 
 def load_solve_results(file_path: str) -> list[SolveResult]:
-    """加载求解结果"""
+    """Loads solving results"""
     data = load_json(file_path)
     results_data = data.get("solve_results", data) if isinstance(data, dict) else data
     return [SolveResult.model_validate(r) for r in results_data]
 
 
 def save_session_result(result: SessionResult, file_path: str) -> None:
-    """保存完整 session 结果"""
+    """Saves the complete session result"""
     save_json(result.model_dump(), file_path)
 
 
 def load_session_result(file_path: str) -> SessionResult:
-    """加载 session 结果"""
+    """Loads session result"""
     data = load_json(file_path)
     return SessionResult.model_validate(data)
 
@@ -112,23 +112,23 @@ def create_session_output(
     user_answers: Optional[dict[str, str]] = None
 ) -> SessionResult:
     """
-    创建 session 输出对象
+    Creates a session output object
     
     Args:
-        session_id: 会话 ID
-        pdf_path: PDF 路径
-        mode: 运行模式
-        questions: 抽取的题目
-        failed_pages: 失败的页码
-        errors: 错误信息
-        solve_results: 求解结果
-        diagnose_results: 诊断结果
-        user_answers: 用户答案
+        session_id: Session ID
+        pdf_path: PDF file path
+        mode: Running mode
+        questions: Extracted questions
+        failed_pages: List of failed page numbers
+        errors: Error messages
+        solve_results: Solving results
+        diagnose_results: Diagnosis results
+        user_answers: User answers
     
     Returns:
-        SessionResult 对象
+        SessionResult object
     """
-    # 计算统计信息
+    # Calculate statistics
     total_questions = len(questions)
     answered_questions = len(user_answers) if user_answers else 0
     correct_count = 0
@@ -159,4 +159,3 @@ def create_session_output(
         correct_count=correct_count,
         incorrect_ids=incorrect_ids
     )
-

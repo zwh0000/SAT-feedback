@@ -1,6 +1,6 @@
 """
-GRE 数学错误类型分类体系
-用于诊断阶段的误区分类
+GRE Math Error Classification System
+Taxonomy used for misconception classification during the diagnosis stage
 """
 
 from typing import Optional
@@ -9,138 +9,138 @@ from dataclasses import dataclass
 
 @dataclass
 class MisconceptionType:
-    """误区类型"""
+    """Misconception type definition"""
     code: str
     name: str
     description: str
     examples: list[str]
 
 
-# GRE 数学常见误区分类
+# Common GRE Math Misconception Taxonomy
 MISCONCEPTION_TAXONOMY = {
-    # 计算类错误
+    # Calculation Errors
     "CALC_SIGN": MisconceptionType(
         code="CALC_SIGN",
-        name="符号错误",
-        description="正负号处理错误，如减法变加法",
-        examples=["-(−3) 误算为 -3", "移项忘记变号"]
+        name="Sign Error",
+        description="Incorrect handling of positive/negative signs, such as changing subtraction to addition",
+        examples=["-(-3) miscalculated as -3", "Forgetting to change the sign when moving terms across an equation"]
     ),
     "CALC_ORDER": MisconceptionType(
         code="CALC_ORDER",
-        name="运算顺序错误",
-        description="未按正确的运算优先级计算",
-        examples=["2+3×4 计算为 20 而非 14", "先算加减后算乘除"]
+        name="Order of Operations Error",
+        description="Failing to calculate according to the correct operator precedence (PEMDAS/BODMAS)",
+        examples=["2+3×4 calculated as 20 instead of 14", "Performing addition/subtraction before multiplication/division"]
     ),
     "CALC_DECIMAL": MisconceptionType(
         code="CALC_DECIMAL",
-        name="小数/分数计算错误",
-        description="小数点位置或分数运算出错",
-        examples=["0.1 × 0.1 = 0.01 误算为 0.1", "通分计算错误"]
+        name="Decimal/Fraction Calculation Error",
+        description="Mistakes in decimal point placement or fraction operations",
+        examples=["0.1 × 0.1 = 0.01 miscalculated as 0.1", "Errors in finding a common denominator"]
     ),
     "CALC_POWER": MisconceptionType(
         code="CALC_POWER",
-        name="指数运算错误",
-        description="幂运算规则应用错误",
-        examples=["(x²)³ 误算为 x⁵", "x² × x³ 误算为 x⁶"]
+        name="Exponent/Power Error",
+        description="Incorrect application of exponent rules",
+        examples=["(x²)³ miscalculated as x⁵", "x² × x³ miscalculated as x⁶"]
     ),
     
-    # 概念类错误
+    # Conceptual Errors
     "CONCEPT_FORMULA": MisconceptionType(
         code="CONCEPT_FORMULA",
-        name="公式记忆错误",
-        description="记错或混淆相关公式",
-        examples=["圆面积用 2πr 代替 πr²", "混淆排列与组合公式"]
+        name="Formula Misremembrance",
+        description="Remembering or confusing related formulas incorrectly",
+        examples=["Using 2πr instead of πr² for the area of a circle", "Confusing Permutation and Combination formulas"]
     ),
     "CONCEPT_DEFINITION": MisconceptionType(
         code="CONCEPT_DEFINITION",
-        name="定义理解偏差",
-        description="对数学概念的定义理解不准确",
-        examples=["误解中位数的定义", "混淆因数和倍数"]
+        name="Definitional Misunderstanding",
+        description="Inaccurate understanding of the definition of mathematical concepts",
+        examples=["Misunderstanding the definition of 'median'", "Confusing 'factors' with 'multiples'"]
     ),
     "CONCEPT_PROPERTY": MisconceptionType(
         code="CONCEPT_PROPERTY",
-        name="性质理解错误",
-        description="对数学性质的理解或应用错误",
-        examples=["负数平方仍为负", "平行线性质应用错误"]
+        name="Property Misapplication",
+        description="Error in understanding or applying mathematical properties",
+        examples=["Assuming the square of a negative number is still negative", "Incorrect application of parallel line properties"]
     ),
     
-    # 审题类错误
+    # Reading/Interpretation Errors
     "READ_CONDITION": MisconceptionType(
         code="READ_CONDITION",
-        name="遗漏条件",
-        description="忽略题目中的重要条件或限制",
-        examples=["忽略 x > 0 的限制", "遗漏'整数'条件"]
+        name="Missing Condition",
+        description="Ignoring important conditions or constraints in the problem",
+        examples=["Ignoring the x > 0 constraint", "Overlooking the 'integer' requirement"]
     ),
     "READ_QUESTION": MisconceptionType(
         code="READ_QUESTION",
-        name="误读问题",
-        description="对题目要求的理解有偏差",
-        examples=["求周长却算面积", "求最大值却求最小值"]
+        name="Misreading the Question",
+        description="Deviation in understanding what the question is asking for",
+        examples=["Calculating perimeter when asked for area", "Finding the maximum when asked for the minimum"]
     ),
     "READ_UNITS": MisconceptionType(
         code="READ_UNITS",
-        name="单位转换错误",
-        description="忽略或错误处理单位转换",
-        examples=["分钟与小时混用", "厘米与米未转换"]
+        name="Unit Conversion Error",
+        description="Ignoring or incorrectly processing unit conversions",
+        examples=["Mixing minutes and hours", "Failing to convert centimeters to meters"]
     ),
     
-    # 陷阱类错误
+    # Trap/Distractor Errors
     "TRAP_INTERMEDIATE": MisconceptionType(
         code="TRAP_INTERMEDIATE",
-        name="中间结果陷阱",
-        description="将计算过程中的中间结果当作最终答案",
-        examples=["求 2x 却只算出 x 就选答案", "约分前的结果"]
+        name="Intermediate Result Trap",
+        description="Mistaking an intermediate calculation step for the final answer",
+        examples=["Solving for x and picking that answer when the question asks for 2x", "Picking a result before final simplification"]
     ),
     "TRAP_SIMILAR": MisconceptionType(
         code="TRAP_SIMILAR",
-        name="相似数值陷阱",
-        description="选择了与正确答案相近的干扰项",
-        examples=["正确是 12，误选 21", "正确是 3/4，误选 4/3"]
+        name="Similar Value Trap",
+        description="Choosing a distractor that is numerically similar to the correct answer",
+        examples=["Picking 21 when the correct answer is 12", "Picking 4/3 when the correct answer is 3/4"]
     ),
     "TRAP_COMMON": MisconceptionType(
         code="TRAP_COMMON",
-        name="常见错误陷阱",
-        description="选项设计为常见错误的结果",
-        examples=["设计为符号错误的结果", "设计为少算一步的结果"]
+        name="Common Error Trap",
+        description="Options specifically designed to match results of common mistakes",
+        examples=["A choice that matches a sign error result", "A choice that matches a result missing the final step"]
     ),
     
-    # 方法类错误
+    # Methodological Errors
     "METHOD_WRONG": MisconceptionType(
         code="METHOD_WRONG",
-        name="方法选择错误",
-        description="使用了不适用于该题的解法",
-        examples=["应该列方程却用算术法", "不等式两边除以负数忘变号"]
+        name="Incorrect Method Selection",
+        description="Using a solution method that is not applicable to the problem",
+        examples=["Using arithmetic when an algebraic equation is required", "Forgetting to flip the inequality sign when dividing by a negative number"]
     ),
     "METHOD_INCOMPLETE": MisconceptionType(
         code="METHOD_INCOMPLETE",
-        name="解法不完整",
-        description="解题步骤遗漏或不完整",
-        examples=["方程只解出一个根", "忘记验算舍去根"]
+        name="Incomplete Solution",
+        description="Missing steps or failing to complete the solution process",
+        examples=["Solving an equation for only one of its roots", "Forgetting to check and discard extraneous roots"]
     ),
     
-    # 逻辑类错误
+    # Logical Errors
     "LOGIC_REVERSE": MisconceptionType(
         code="LOGIC_REVERSE",
-        name="因果颠倒",
-        description="颠倒了条件和结论的关系",
-        examples=["充分条件与必要条件混淆", "逆命题当原命题"]
+        name="Reverse Logic",
+        description="Reversing the relationship between conditions and conclusions",
+        examples=["Confusing sufficient and necessary conditions", "Treating the converse as the original proposition"]
     ),
     "LOGIC_SCOPE": MisconceptionType(
         code="LOGIC_SCOPE",
-        name="范围判断错误",
-        description="对取值范围或集合关系判断错误",
-        examples=["不等式解集判断错误", "交集并集混淆"]
+        name="Scope/Range Error",
+        description="Incorrect judgment regarding numerical ranges or set relationships",
+        examples=["Incorrectly determining the solution set of an inequality", "Confusing Union and Intersection of sets"]
     )
 }
 
 
 def get_misconception_by_code(code: str) -> Optional[MisconceptionType]:
-    """根据代码获取误区类型"""
+    """Retrieves a misconception type by its code"""
     return MISCONCEPTION_TAXONOMY.get(code)
 
 
 def get_misconceptions_by_topic(topic: str) -> list[MisconceptionType]:
-    """根据题目主题获取可能的误区类型"""
+    """Retrieves likely misconception types based on the problem topic"""
     topic_misconceptions = {
         "algebra": ["CALC_SIGN", "CALC_ORDER", "CONCEPT_FORMULA", "METHOD_WRONG", "READ_CONDITION"],
         "geometry": ["CONCEPT_FORMULA", "CONCEPT_PROPERTY", "READ_UNITS", "CALC_DECIMAL"],
@@ -155,14 +155,13 @@ def get_misconceptions_by_topic(topic: str) -> list[MisconceptionType]:
 
 
 def format_misconception_for_prompt(misconception: MisconceptionType) -> str:
-    """格式化误区类型供 prompt 使用"""
+    """Formats a misconception type for use in a prompt"""
     return f"- {misconception.name}: {misconception.description}"
 
 
 def get_all_misconceptions_prompt() -> str:
-    """获取所有误区类型的 prompt 格式文本"""
-    lines = ["常见 GRE 数学误区分类："]
+    """Retrieves all misconception types in a formatted text for prompts"""
+    lines = ["Common GRE Math Misconception Categories:"]
     for m in MISCONCEPTION_TAXONOMY.values():
         lines.append(format_misconception_for_prompt(m))
     return "\n".join(lines)
-
