@@ -369,13 +369,26 @@ ENGLISH_TRANSCRIBE_SYSTEM_PROMPT = """You are a professional SAT English questio
 1. Only extract and structure questions, DO NOT solve them!
 2. Must output strict JSON format
 3. Must extract all A-D options (SAT English typically has 4 options)
-4. Preserve passage context when relevant
+4. CRITICAL: Include the passage/text description in the "stem" field - the model needs this context to answer!
 5. Record any unclear or uncertain text
 
 [Question Types for SAT English]
-- Reading Comprehension: Questions about passages
+- Reading Comprehension: Questions about passages (Text 1, Text 2, etc.)
 - Writing and Language: Grammar, punctuation, sentence structure
 - Vocabulary in Context: Word meaning based on usage
+
+[CRITICAL: Stem Must Include Full Context]
+SAT English questions typically have this structure:
+1. A passage or text description (Text 1, Text 2, or a paragraph)
+2. A question asking about the passage
+3. Four options A-D
+
+Your "stem" field MUST include:
+- The full passage/text that the question refers to
+- The actual question being asked
+
+Example format for stem:
+"Text 1: [full passage text here]\\n\\nText 2: [full passage text here]\\n\\nQuestion: Based on the texts, how would..."
 
 [Output Format]
 You must output a JSON object containing a "questions" array:
@@ -388,14 +401,13 @@ You must output a JSON object containing a "questions" array:
       "exam": "SAT",
       "section": "English",
       "problem_type": "multiple_choice",
-      "stem": "question text (include relevant passage context if needed)",
+      "stem": "[MUST INCLUDE FULL PASSAGE + QUESTION] Text 1: ... Text 2: ... Question: ...",
       "choices": {{
         "A": "option A content",
         "B": "option B content",
         "C": "option C content",
         "D": "option D content"
       }},
-      "passage_context": "relevant passage text if this is a reading question",
       "question_category": "grammar|punctuation|vocabulary|reading_comprehension|transitions|conciseness",
       "uncertain_spans": [
         {{"span": "unclear text", "reason": "OCR error or unclear", "location": "location"}}
@@ -409,7 +421,7 @@ You must output a JSON object containing a "questions" array:
 - OCR text may contain errors - try to infer correct text from context
 - Question numbers may be formatted as "1.", "1)", "(1)", "Question 1", etc.
 - Options may be formatted as "A.", "A)", "(A)", etc.
-- Passage text may be separated from questions - associate them correctly
+- Passage text (Text 1, Text 2) MUST be included in the stem
 - Line breaks in OCR may not reflect actual paragraph breaks
 
 Output only JSON, no explanatory text."""
@@ -431,10 +443,12 @@ OCR Extracted Text:
 {ocr_text}
 ---
 
-Requirements:
-1. Extract all questions from this text
-2. Associate questions with relevant passage context
-3. Ensure all options A-D are captured
+[CRITICAL REQUIREMENTS]
+1. The "stem" field MUST include the FULL passage text (Text 1, Text 2, etc.) + the question
+   - Without the passage, the question cannot be answered!
+   - Format: "Text 1: [passage]\\n\\nText 2: [passage]\\n\\nQuestion: [actual question]"
+2. Extract all options A-D
+3. Identify the question category (grammar, reading_comprehension, vocabulary, etc.)
 4. Note any OCR errors in uncertain_spans
 5. Output valid JSON only"""
 
@@ -447,15 +461,16 @@ ENGLISH_QUESTION_SCHEMA_HINT = """{{
       "exam": "SAT",
       "section": "English",
       "problem_type": "multiple_choice",
-      "stem": "Which choice best maintains...",
-      "choices": {{"A": "...", "B": "...", "C": "...", "D": "..."}},
-      "passage_context": "The passage discusses...",
-      "question_category": "grammar",
+      "stem": "Text 1:\\nSingh and Roy argue that mandatory voting policies are problematic because they force citizens to participate without ensuring informed decision-making...\\n\\nText 2:\\nResearch by political scientists shows that countries with mandatory voting have higher turnout rates and more representative governments...\\n\\nQuestion: Based on the texts, how would Singh and Roy (Text 2) most likely respond to the research discussed in Text 1?",
+      "choices": {{"A": "The research overlooks important factors about voter education.", "B": "The findings support their argument about forced participation.", "C": "The data is insufficient to draw meaningful conclusions.", "D": "The study confirms the benefits of mandatory voting."}},
+      "question_category": "reading_comprehension",
       "uncertain_spans": [],
       "confidence": 0.9
     }}
   ]
-}}"""
+}}
+
+IMPORTANT: The "stem" MUST include the full passage text, not just the question!"""
 
 
 # ============================================================
