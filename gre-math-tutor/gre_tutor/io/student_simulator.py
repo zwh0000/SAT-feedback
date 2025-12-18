@@ -291,6 +291,14 @@ def format_questions_for_simulator(
             
             lines.append(f"Stem: {q.stem}")
             
+            # Include LaTeX equations if available
+            if q.latex_equations:
+                lines.append(f"Formulas: {', '.join(q.latex_equations)}")
+            
+            # Include diagram description if available
+            if q.diagram_description:
+                lines.append(f"Diagram: {q.diagram_description}")
+            
             if is_multiple_choice and q.choices:
                 lines.append("Options:")
                 for opt in ['A', 'B', 'C', 'D', 'E']:

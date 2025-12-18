@@ -7,52 +7,63 @@ For three stages: Transcribe, Solve, Diagnose
 # Stage T: Transcribe - Only transcribe, no solving
 # ============================================================
 
-TRANSCRIBE_SYSTEM_PROMPT = """You are a professional GRE math problem transcription expert. Your only task is to accurately transcribe math problems from images into structured JSON format.
+TRANSCRIBE_SYSTEM_PROMPT = """You are a professional GRE/SAT math problem transcription expert. Your only task is to accurately transcribe math problems from images into structured JSON format.
 
 [Important Constraints]
 1. Only transcribe, DO NOT solve! Do not provide any solution or answer.
 2. Must output strict JSON format
 3. Must extract all A-E options
-4. Formulas must be converted to LaTeX format
+4. IMPORTANT: Embed formulas directly in "stem" and "choices" using LaTeX notation
 5. Any uncertain content must be recorded in uncertain_spans
 
+[CRITICAL: Formulas Must Be In Stem]
+All mathematical formulas must be embedded directly in the "stem" field using LaTeX notation.
+This makes questions self-contained and readable.
+
+Example - CORRECT:
+"stem": "If 5p + 180 = 250, what is the value of p?"
+"stem": "What is the value of x if \\frac{x^2 + 2x}{3} = 15?"
+"stem": "The area of a circle is \\pi r^2. If r = 3, what is the area?"
+
+Example - WRONG (don't separate formulas):
+"stem": "What is the value of x?"  // Missing the equation!
+"latex_equations": ["x^2 + 2x = 15"]  // Don't put formulas only here
+
 [Output Format]
-You must output a JSON object containing a "questions" array, each question object structured as follows:
+You must output a JSON object containing a "questions" array:
 
 {
   "questions": [
     {
-      "id": "p{page}_q{num}",  // Format must be p{page}_q{number}, e.g. p1_q1, p1_q2, p2_q3. Number must be integer, no decimals!
+      "id": "p{page}_q{num}",
       "source": {"pdf": "filename", "page": page_number},
-      "exam": "GRE",
+      "exam": "SAT",
       "section": "Math",
       "problem_type": "multiple_choice|numeric_entry|unknown",
-      "stem": "problem stem text (required)",
+      "stem": "COMPLETE problem text WITH formulas embedded, e.g. If 2x + 5 = 15, what is x?",
       "choices": {
-        "A": "option A content",
-        "B": "option B content", 
-        "C": "option C content",
-        "D": "option D content",
-        "E": "option E content"
+        "A": "option A (with formulas if needed)",
+        "B": "option B",
+        "C": "option C",
+        "D": "option D",
+        "E": "option E"
       },
-      "latex_equations": ["formula1", "formula2"],
+      "latex_equations": [],
       "diagram_description": "diagram description or null",
       "constraints": ["constraints"],
-      "uncertain_spans": [
-        {"span": "unclear text", "reason": "reason", "location": "location"}
-      ],
+      "uncertain_spans": [],
       "confidence": 0.0-1.0
     }
   ]
 }
 
 [Option Processing Rules]
-- GRE Math multiple choice usually has A-E five options
-- If an option is unclear, write "UNKNOWN" in choices and record in uncertain_spans
-- If option is completely missing, write null in choices
-- Must lower confidence when options are incomplete
+- Math multiple choice usually has A-E five options (SAT may have A-D)
+- Options may contain formulas - embed them using LaTeX notation
+- If an option is unclear, write "UNKNOWN" and record in uncertain_spans
+- If option is missing, write null
 
-[Formula Conversion Rules]
+[Formula Notation in Stem/Choices]
 - Fractions: \\frac{a}{b}
 - Superscripts: x^2, x^{10}
 - Subscripts: x_1, x_{12}
@@ -62,7 +73,7 @@ You must output a JSON object containing a "questions" array, each question obje
 
 Output only JSON, no explanatory text."""
 
-TRANSCRIBE_USER_PROMPT_TEMPLATE = """Please transcribe all GRE math problems from this image.
+TRANSCRIBE_USER_PROMPT_TEMPLATE = """Please transcribe all math problems from this image.
 
 File Info:
 - PDF: {pdf_name}
@@ -74,12 +85,14 @@ File Info:
 - NO decimals allowed! Wrong examples: p1_q1.1, p1_q1.2
 - If a page has 3 questions, name them: p{page_number}_q1, p{page_number}_q2, p{page_number}_q3
 
-Requirements:
+[CRITICAL Requirements]
 1. Only transcribe, do not solve
 2. Must output strict JSON
-3. Extract all A-E options
-4. Convert formulas to LaTeX
-5. Record uncertain content in uncertain_spans"""
+3. Extract all options (A-E for GRE, A-D for SAT)
+4. EMBED ALL FORMULAS DIRECTLY IN THE STEM - do not separate them!
+   Example: "stem": "If 5p + 180 = 250, what is the value of p?"
+5. Options may also contain formulas - include them inline
+6. Record uncertain content in uncertain_spans"""
 
 TRANSCRIBE_RETRY_PROMPT = """Your previous output could not be parsed as valid JSON. Please strictly follow this format:
 
