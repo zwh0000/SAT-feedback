@@ -1,0 +1,59 @@
+{
+  "_comment": "详细格式的标准答案文件示例 - 包含答案、知识点和解题步骤",
+  "_format": "详细格式: {题目ID: {answer, topic, steps, reason}}",
+  
+  "p1_q1": {
+    "answer": "C",
+    "topic": "algebra",
+    "steps": [
+      "从方程 x + 5 = 12 出发",
+      "两边同时减去 5",
+      "得到 x = 7"
+    ],
+    "reason": "简单的一元一次方程求解"
+  },
+  
+  "p1_q2": {
+    "answer": "D",
+    "topic": "geometry",
+    "steps": [
+      "圆面积公式: A = πr²",
+      "代入 r = 4",
+      "A = π × 16 = 16π"
+    ],
+    "reason": "套用圆面积公式"
+  },
+  
+  "p1_q3": {
+    "answer": "7",
+    "topic": "algebra",
+    "steps": [
+      "设方程 3x - 7 = 14",
+      "移项得 3x = 21",
+      "解得 x = 7"
+    ],
+    "reason": "一元一次方程求解"
+  },
+  
+  "p1_q4": {
+    "answer": "1/2",
+    "topic": "arithmetic",
+    "steps": [
+      "计算 50% = 50/100",
+      "化简得 1/2"
+    ],
+    "reason": "百分数转分数"
+  },
+  
+  "p2_q1": {
+    "answer": "B",
+    "topic": "geometry",
+    "steps": [
+      "使用勾股定理 a² + b² = c²",
+      "3² + 4² = 9 + 16 = 25",
+      "c = √25 = 5"
+    ],
+    "reason": "勾股定理应用"
+  }
+}
+

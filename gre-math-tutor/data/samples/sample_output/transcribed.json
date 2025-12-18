@@ -1,0 +1,53 @@
+{
+  "questions": [
+    {
+      "id": "p1_q1",
+      "source": {
+        "pdf": "sample.pdf",
+        "page": 1
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "multiple_choice",
+      "stem": "If x + 5 = 12, what is the value of x?",
+      "choices": {
+        "A": "5",
+        "B": "6",
+        "C": "7",
+        "D": "8",
+        "E": "17"
+      },
+      "latex_equations": ["x + 5 = 12"],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 0.95
+    },
+    {
+      "id": "p1_q2",
+      "source": {
+        "pdf": "sample.pdf",
+        "page": 1
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "multiple_choice",
+      "stem": "What is the area of a circle with radius 4?",
+      "choices": {
+        "A": "4π",
+        "B": "8π",
+        "C": "12π",
+        "D": "16π",
+        "E": "64π"
+      },
+      "latex_equations": ["A = \\pi r^2"],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 0.92
+    }
+  ],
+  "total": 2,
+  "timestamp": "2024-12-16T14:30:52"
+}
+

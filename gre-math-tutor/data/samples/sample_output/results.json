@@ -1,0 +1,120 @@
+{
+  "session_id": "20241216_143052",
+  "pdf_path": "data/samples/sample.pdf",
+  "mode": "diagnose",
+  "timestamp": "2024-12-16T14:30:52",
+  "transcribed": {
+    "questions": [
+      {
+        "id": "p1_q1",
+        "source": {"pdf": "sample.pdf", "page": 1},
+        "exam": "GRE",
+        "section": "Math",
+        "problem_type": "multiple_choice",
+        "stem": "If x + 5 = 12, what is the value of x?",
+        "choices": {"A": "5", "B": "6", "C": "7", "D": "8", "E": "17"},
+        "latex_equations": ["x + 5 = 12"],
+        "diagram_description": null,
+        "constraints": [],
+        "uncertain_spans": [],
+        "confidence": 0.95
+      },
+      {
+        "id": "p1_q2",
+        "source": {"pdf": "sample.pdf", "page": 1},
+        "exam": "GRE",
+        "section": "Math",
+        "problem_type": "multiple_choice",
+        "stem": "What is the area of a circle with radius 4?",
+        "choices": {"A": "4π", "B": "8π", "C": "12π", "D": "16π", "E": "64π"},
+        "latex_equations": ["A = \\pi r^2"],
+        "diagram_description": null,
+        "constraints": [],
+        "uncertain_spans": [],
+        "confidence": 0.92
+      }
+    ],
+    "total_pages": 1,
+    "failed_pages": [],
+    "errors": []
+  },
+  "solve_results": [
+    {
+      "question_id": "p1_q1",
+      "correct_answer": "C",
+      "topic": "algebra",
+      "key_steps": [
+        "从等式 x + 5 = 12 出发",
+        "两边同时减去 5",
+        "得到 x = 12 - 5 = 7"
+      ],
+      "final_reason": "通过简单的代数运算，将 5 移到等号右边得到 x = 7",
+      "confidence": 0.98
+    },
+    {
+      "question_id": "p1_q2",
+      "correct_answer": "D",
+      "topic": "geometry",
+      "key_steps": [
+        "回忆圆面积公式：A = πr²",
+        "代入半径 r = 4",
+        "计算：A = π × 4² = π × 16 = 16π"
+      ],
+      "final_reason": "使用圆面积公式 A = πr²，代入 r = 4 得到面积为 16π",
+      "confidence": 0.95
+    }
+  ],
+  "diagnose_results": [
+    {
+      "question_id": "p1_q1",
+      "user_answer": "C",
+      "correct_answer": "C",
+      "is_correct": true,
+      "why_user_choice_is_tempting": null,
+      "likely_misconceptions": [],
+      "how_to_get_correct": null,
+      "option_analysis": [
+        {
+          "option": "C",
+          "content": "7",
+          "analysis": "正确答案",
+          "is_correct": true,
+          "is_user_choice": true
+        }
+      ]
+    },
+    {
+      "question_id": "p1_q2",
+      "user_answer": "A",
+      "correct_answer": "D",
+      "is_correct": false,
+      "why_user_choice_is_tempting": "选项 A (4π) 可能是将面积公式误记为 A = πr，直接用半径乘以 π 得到的结果。这是一个非常常见的错误，因为 πr 的形式在圆周长公式 C = 2πr 中出现过，容易混淆。",
+      "likely_misconceptions": [
+        "混淆了圆面积公式 (A = πr²) 和圆周长公式 (C = 2πr)",
+        "忘记对半径进行平方运算"
+      ],
+      "how_to_get_correct": "要得到正确答案 D (16π)，需要：\n1. 回忆正确的圆面积公式：A = πr²（注意 r 要平方）\n2. 将半径 r = 4 代入公式\n3. 计算：A = π × 4² = π × 16 = 16π\n4. 在选项中找到 16π，即选项 D",
+      "option_analysis": [
+        {
+          "option": "A",
+          "content": "4π",
+          "analysis": "这是一个干扰项，可能是用户将面积公式误记为 πr 而非 πr²",
+          "is_correct": false,
+          "is_user_choice": true
+        },
+        {
+          "option": "D",
+          "content": "16π",
+          "analysis": "正确答案，使用圆面积公式 A = πr² = π × 4² = 16π",
+          "is_correct": true,
+          "is_user_choice": false
+        }
+      ]
+    }
+  ],
+  "total_questions": 2,
+  "answered_questions": 2,
+  "correct_count": 1,
+  "incorrect_ids": ["p1_q2"]
+}
+

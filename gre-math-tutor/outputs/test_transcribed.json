@@ -1,0 +1,761 @@
+{
+  "questions": [
+    {
+      "id": "p1_q1",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 1
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "multiple_choice",
+      "stem": "What value of p satisfies the equation 5p + 180 = 250?",
+      "choices": {
+        "A": "14",
+        "B": "65",
+        "C": "86",
+        "D": "250",
+        "E": null
+      },
+      "latex_equations": [
+        "5p + 180 = 250"
+      ],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    },
+    {
+      "id": "p1_q2",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 1
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "numeric_entry",
+      "stem": "The perimeter of an isosceles triangle is 83 inches. Each of the two congruent sides of the triangle has a length of 24 inches. What is the length, in inches, of the third side?",
+      "choices": {
+        "A": null,
+        "B": null,
+        "C": null,
+        "D": null,
+        "E": null
+      },
+      "latex_equations": [],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    },
+    {
+      "id": "p1_q3",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 1
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "multiple_choice",
+      "stem": "In the equation above, what is the value of x?",
+      "choices": {
+        "A": "25",
+        "B": "24",
+        "C": "16",
+        "D": "15",
+        "E": null
+      },
+      "latex_equations": [
+        "\\frac{4x}{5} = 20"
+      ],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    },
+    {
+      "id": "p1_q4",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 1
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "multiple_choice",
+      "stem": "Which of the following is equivalent to 4x + 6 = 12?",
+      "choices": {
+        "A": "2x + 4 = 6",
+        "B": "x + 3 = 3",
+        "C": "3x + 2 = 4",
+        "D": "2x + 3 = 6",
+        "E": null
+      },
+      "latex_equations": [
+        "4x + 6 = 12"
+      ],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    },
+    {
+      "id": "p2_q1",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 2
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "multiple_choice",
+      "stem": "One pound of grapes costs $2. At this rate, how many dollars will c pounds of grapes cost?",
+      "choices": {
+        "A": "2c",
+        "B": "2 + c",
+        "C": "\\frac{2}{c}",
+        "D": "\\frac{c}{2}",
+        "E": null
+      },
+      "latex_equations": [
+        "2c",
+        "2 + c",
+        "\\frac{2}{c}",
+        "\\frac{c}{2}"
+      ],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 0.95
+    },
+    {
+      "id": "p2_q2",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 2
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "multiple_choice",
+      "stem": "A principal used a total of 25 flags that were either blue or yellow for field day. The principal used 20 blue flags. How many yellow flags were used?",
+      "choices": {
+        "A": "5",
+        "B": "20",
+        "C": "25",
+        "D": "30",
+        "E": null
+      },
+      "latex_equations": [],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    },
+    {
+      "id": "p2_q3",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 2
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "multiple_choice",
+      "stem": "What value of x is the solution to the given equation?",
+      "choices": {
+        "A": "11",
+        "B": "80",
+        "C": "96",
+        "D": "704",
+        "E": null
+      },
+      "latex_equations": [
+        "8x = 88"
+      ],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    },
+    {
+      "id": "p2_q4",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 2
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "multiple_choice",
+      "stem": "How many solutions exist to the equation shown above?",
+      "choices": {
+        "A": "None",
+        "B": "Exactly 1",
+        "C": "Exactly 3",
+        "D": "Infinitely many",
+        "E": null
+      },
+      "latex_equations": [
+        "10 = 2x + 4"
+      ],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    },
+    {
+      "id": "p3_q1",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 3
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "multiple_choice",
+      "stem": "Cathy has n CDs. Gerry has 3 more than twice the number of CDs that Cathy has. In terms of n, how many CDs does Gerry have?",
+      "choices": {
+        "A": "3n - 2",
+        "B": "3n + 2",
+        "C": "2n - 3",
+        "D": "2n + 3",
+        "E": null
+      },
+      "latex_equations": [
+        "3n - 2",
+        "3n + 2",
+        "2n - 3",
+        "2n + 3"
+      ],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    },
+    {
+      "id": "p3_q2",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 3
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "multiple_choice",
+      "stem": "A gym charges its members a onetime $36 enrollment fee and a membership fee of $19 per month. If there are no charges other than the enrollment fee and the membership fee, after how many months will a member have been charged a total of $188 at the gym?",
+      "choices": {
+        "A": "4",
+        "B": "5",
+        "C": "8",
+        "D": "10",
+        "E": null
+      },
+      "latex_equations": [],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    },
+    {
+      "id": "p3_q3",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 3
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "multiple_choice",
+      "stem": "For what value of w does w - 10 = 2(w + 5)?",
+      "choices": {
+        "A": "5",
+        "B": "0",
+        "C": "-15",
+        "D": "-20",
+        "E": null
+      },
+      "latex_equations": [
+        "w - 10 = 2(w + 5)"
+      ],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    },
+    {
+      "id": "p3_q4",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 3
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "multiple_choice",
+      "stem": "If \\( \\frac{2n}{5} = \\frac{10}{10} \\), what is the value of \\( 2n - 1 \\)?",
+      "choices": {
+        "A": "24",
+        "B": "49",
+        "C": "50",
+        "D": "99",
+        "E": null
+      },
+      "latex_equations": [
+        "\\frac{2n}{5} = \\frac{10}{10}",
+        "2n - 1"
+      ],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    },
+    {
+      "id": "p4_q1",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 4
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "multiple_choice",
+      "stem": "If \\( \\frac{1}{2^x} - \\frac{1}{6^x} = 1 \\), what is the value of \\( x \\)?",
+      "choices": {
+        "A": "-4",
+        "B": "\\frac{1}{3}",
+        "C": "3",
+        "D": "6",
+        "E": null
+      },
+      "latex_equations": [
+        "\\frac{1}{2^x} - \\frac{1}{6^x} = 1"
+      ],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    },
+    {
+      "id": "p4_q2",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 4
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "numeric_entry",
+      "stem": "If \\( 2 + x = 60 \\), what is the value of \\( 16 + 8x \\)?",
+      "choices": {
+        "A": null,
+        "B": null,
+        "C": null,
+        "D": null,
+        "E": null
+      },
+      "latex_equations": [
+        "2 + x = 60",
+        "16 + 8x"
+      ],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    },
+    {
+      "id": "p4_q3",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 4
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "numeric_entry",
+      "stem": "If \\( 3x + 2 = 8 \\), what is the value of \\( 9x + 6 \\)?",
+      "choices": {
+        "A": null,
+        "B": null,
+        "C": null,
+        "D": null,
+        "E": null
+      },
+      "latex_equations": [
+        "3x + 2 = 8",
+        "9x + 6"
+      ],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    },
+    {
+      "id": "p4_q4",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 4
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "multiple_choice",
+      "stem": "A librarian has 43 books to distribute to a group of children. If he gives each child 2 books, he will have 7 books left over. How many children are in the group?",
+      "choices": {
+        "A": "15",
+        "B": "18",
+        "C": "25",
+        "D": "29",
+        "E": null
+      },
+      "latex_equations": [],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    },
+    {
+      "id": "p4_q5",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 4
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "numeric_entry",
+      "stem": "In the given equation, \\( k \\) is a constant. If the equation has infinitely many solutions, what is the value of \\( k \\)?",
+      "choices": {
+        "A": null,
+        "B": null,
+        "C": null,
+        "D": null,
+        "E": null
+      },
+      "latex_equations": [
+        "6x + k = 6x + 5"
+      ],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    },
+    {
+      "id": "p5_q1",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 5
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "multiple_choice",
+      "stem": "If \\(5x = 20\\), what is the value of \\(15x\\)?",
+      "choices": {
+        "A": "7",
+        "B": "12",
+        "C": "23",
+        "D": "60",
+        "E": null
+      },
+      "latex_equations": [
+        "5x = 20",
+        "15x"
+      ],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    },
+    {
+      "id": "p5_q2",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 5
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "multiple_choice",
+      "stem": "What is the solution to the equation \\(2x + 3 = 7\\)?",
+      "choices": {
+        "A": "1",
+        "B": "1.5",
+        "C": "2",
+        "D": "4",
+        "E": null
+      },
+      "latex_equations": [
+        "2x + 3 = 7"
+      ],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    },
+    {
+      "id": "p5_q3",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 5
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "multiple_choice",
+      "stem": "If \\(3x - 27 = 24\\), what is the value of \\(x - 9\\)?",
+      "choices": {
+        "A": "1",
+        "B": "8",
+        "C": "24",
+        "D": "35",
+        "E": null
+      },
+      "latex_equations": [
+        "3x - 27 = 24",
+        "x - 9"
+      ],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    },
+    {
+      "id": "p5_q4",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 5
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "multiple_choice",
+      "stem": "\\(3x + 5(x + 4) = 76\\) What value of \\(x\\) is the solution to the given equation?",
+      "choices": {
+        "A": "7",
+        "B": "8",
+        "C": "56",
+        "D": "72",
+        "E": null
+      },
+      "latex_equations": [
+        "3x + 5(x + 4) = 76"
+      ],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    },
+    {
+      "id": "p5_q5",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 5
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "numeric_entry",
+      "stem": "13x = 112 - x What value of x is the solution to the given equation?",
+      "choices": {
+        "A": null,
+        "B": null,
+        "C": null,
+        "D": null,
+        "E": null
+      },
+      "latex_equations": [
+        "13x = 112 - x"
+      ],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    },
+    {
+      "id": "p6_q1",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 6
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "multiple_choice",
+      "stem": "If \\(3x = 30\\), what is the value of \\(3x - 12\\)?",
+      "choices": {
+        "A": "-2",
+        "B": "18",
+        "C": "22",
+        "D": "42",
+        "E": null
+      },
+      "latex_equations": [
+        "3x = 30",
+        "3x - 12"
+      ],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    },
+    {
+      "id": "p6_q2",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 6
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "numeric_entry",
+      "stem": "\\(x + 40 = 95\\)\nWhat value of \\(x\\) is the solution to the given equation?",
+      "choices": {
+        "A": null,
+        "B": null,
+        "C": null,
+        "D": null,
+        "E": null
+      },
+      "latex_equations": [
+        "x + 40 = 95"
+      ],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    },
+    {
+      "id": "p6_q3",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 6
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "numeric_entry",
+      "stem": "If \\(6 + x = 9\\), what is the value of \\(18 + 3x\\)?",
+      "choices": {
+        "A": null,
+        "B": null,
+        "C": null,
+        "D": null,
+        "E": null
+      },
+      "latex_equations": [
+        "6 + x = 9",
+        "18 + 3x"
+      ],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    },
+    {
+      "id": "p6_q4",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 6
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "multiple_choice",
+      "stem": "3 more than 8 times a number \\(x\\) is equal to 83. Which equation represents this situation?",
+      "choices": {
+        "A": "\\((3)(8x) = 83\\)",
+        "B": "8x = 83 + 3",
+        "C": "3x + 8 = 83",
+        "D": "8x + 3 = 83",
+        "E": null
+      },
+      "latex_equations": [
+        "8x + 3 = 83"
+      ],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    },
+    {
+      "id": "p6_q5",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 6
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "numeric_entry",
+      "stem": "Nasir bought 9 storage bins that were each the same price. He used a coupon for $63 off the entire purchase. The cost for the entire purchase after using the coupon was $27. What was the original price, in dollars, for 1 storage bin?",
+      "choices": {
+        "A": null,
+        "B": null,
+        "C": null,
+        "D": null,
+        "E": null
+      },
+      "latex_equations": [],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    },
+    {
+      "id": "p6_q6",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 6
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "numeric_entry",
+      "stem": "If \\(\\frac{x}{8} = 5\\), what is the value of \\(\\frac{8}{x}\\)?",
+      "choices": {
+        "A": null,
+        "B": null,
+        "C": null,
+        "D": null,
+        "E": null
+      },
+      "latex_equations": [
+        "\\frac{x}{8} = 5",
+        "\\frac{8}{x}"
+      ],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    },
+    {
+      "id": "p7_q1",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 7
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "multiple_choice",
+      "stem": "What value of x is the solution to the equation 16x + 24 = 24x?",
+      "choices": {
+        "A": "-4",
+        "B": "\\frac{3}{10}",
+        "C": "\\frac{1}{3}",
+        "D": "3",
+        "E": null
+      },
+      "latex_equations": [
+        "16x + 24 = 24x"
+      ],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    },
+    {
+      "id": "p7_q2",
+      "source": {
+        "pdf": "Linear_Equations.pdf",
+        "page": 7
+      },
+      "exam": "GRE",
+      "section": "Math",
+      "problem_type": "multiple_choice",
+      "stem": "If 3x - 8 = 7, what is the value of 3x + 8?",
+      "choices": {
+        "A": "-1",
+        "B": "5",
+        "C": "13",
+        "D": "23",
+        "E": null
+      },
+      "latex_equations": [
+        "3x - 8 = 7",
+        "3x + 8"
+      ],
+      "diagram_description": null,
+      "constraints": [],
+      "uncertain_spans": [],
+      "confidence": 1.0
+    }
+  ],
+  "total": 30,
+  "timestamp": "2025-12-17T19:44:50.699090"
+}
