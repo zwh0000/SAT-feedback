@@ -23,11 +23,11 @@ class UncertainSpan(BaseModel):
 class Question(BaseModel):
     """
     Question data model (Stage T output)
-    Supports both GRE Math and SAT English problems
+    Supports both SAT Math and SAT English problems
     """
     id: str = Field(..., description="Unique identifier for the question, format: p{page}_q{num}")
     source: QuestionSource
-    exam: Literal["GRE", "SAT"] = "GRE"
+    exam: Literal["GRE", "SAT"] = "SAT"
     section: Literal["Math", "English"] = "Math"
     problem_type: Literal["multiple_choice", "numeric_entry", "unknown"] = "multiple_choice"
     stem: str = Field(..., description="The problem stem in plain text")

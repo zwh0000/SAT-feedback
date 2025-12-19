@@ -21,7 +21,7 @@ import json
 class QuestionSolver:
     """
     Question Solver
-    Use LLM to solve GRE math questions
+    Use LLM to solve SAT math questions
     """
     
     def __init__(self, llm_client: LLMClient, logger: Optional[Logger] = None):

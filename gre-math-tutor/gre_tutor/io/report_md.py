@@ -23,7 +23,7 @@ def generate_report_md(result: SessionResult) -> str:
     lines = []
     
     # Title
-    lines.append("# GRE Math Tutor Diagnosis Report")
+    lines.append("# SAT Tutor Diagnosis Report")
     lines.append("")
     
     # Basic info
@@ -203,7 +203,7 @@ def print_summary(result: SessionResult) -> None:
     
     # Title
     console.print("\n" + "="*60, style="bold blue")
-    console.print("GRE Math Tutor Run Summary", style="bold blue")
+    console.print("SAT Tutor Run Summary", style="bold blue")
     console.print("="*60, style="bold blue")
     
     # Basic info table

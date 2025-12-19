@@ -68,7 +68,7 @@ class MockLLMClient(LLMClient):
         return {
             "id": f"p{page}_q{self._question_counter}",
             "source": {"pdf": "mock.pdf", "page": page},
-            "exam": "GRE",
+            "exam": "SAT",
             "section": "Math",
             "problem_type": "multiple_choice",
             "stem": q["stem"],

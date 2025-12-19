@@ -1,5 +1,5 @@
 """
-GRE Math Tutor - CLI Entry
+SAT Tutor - CLI Entry
 """
 
 import argparse
@@ -23,11 +23,11 @@ from .core.pipeline import GREMathPipeline
 def parse_args():
     """Parse command line arguments"""
     parser = argparse.ArgumentParser(
-        description="GRE/SAT Tutor - Intelligent Problem Diagnosis System",
+        description="SAT Tutor - Intelligent Problem Diagnosis System",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # GRE Math (default, uses vision model)
+  # SAT Math (default, uses vision model)
   python -m gre_tutor.run --pdf input.pdf --mode diagnose
   
   # SAT English (uses OCR + text model)
@@ -70,7 +70,7 @@ Examples:
         type=str,
         choices=["math", "english"],
         default="math",
-        help="Subject type: math (GRE/SAT Math, vision extraction) or english (SAT English, OCR extraction)"
+        help="Subject type: math (SAT Math, vision extraction) or english (SAT English, OCR extraction)"
     )
     
     parser.add_argument(
@@ -139,7 +139,7 @@ def main():
     
     # Show welcome message
     console.print(Panel.fit(
-        "[bold blue]GRE/SAT Tutor[/bold blue]\n"
+        "[bold blue]SAT Tutor[/bold blue]\n"
         "[dim]Intelligent Problem Diagnosis System[/dim]\n"
         "[dim]Supports: Math (Vision) | English (OCR)[/dim]",
         border_style="blue"

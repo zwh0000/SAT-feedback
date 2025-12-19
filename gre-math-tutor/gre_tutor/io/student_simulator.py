@@ -86,7 +86,7 @@ def get_student_system_prompt(correct_rate: int = 70) -> str:
     Generates the system prompt for student simulation.
     Control of specific errors is now handled via the User Prompt instructions.
     """
-    return f"""You are an AI simulating a student taking a math test. Your goal is to act like a real student learning GRE/SAT math.
+    return f"""You are an AI simulating a student taking a math test. Your goal is to act like a real student learning SAT math.
 Your target overall accuracy is approximately {correct_rate}%.
 
 [IMPORTANT: Reasoning-First Logic]

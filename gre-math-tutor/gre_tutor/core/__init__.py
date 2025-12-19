@@ -1,2 +1,2 @@
-"""Core modules for GRE Math Tutor"""
+"""Core modules for SAT Tutor"""
 

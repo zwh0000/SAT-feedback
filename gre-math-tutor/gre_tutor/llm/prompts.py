@@ -7,7 +7,7 @@ For three stages: Transcribe, Solve, Diagnose
 # Stage T: Transcribe - Only transcribe, no solving
 # ============================================================
 
-TRANSCRIBE_SYSTEM_PROMPT = """You are a professional GRE/SAT math problem transcription expert. Your only task is to accurately transcribe math problems from images into structured JSON format.
+TRANSCRIBE_SYSTEM_PROMPT = """You are a professional SAT math problem transcription expert. Your only task is to accurately transcribe math problems from images into structured JSON format.
 
 [Important Constraints]
 1. Only transcribe, DO NOT solve! Do not provide any solution or answer.
@@ -88,7 +88,7 @@ File Info:
 [CRITICAL Requirements]
 1. Only transcribe, do not solve
 2. Must output strict JSON
-3. Extract all options (A-E for GRE, A-D for SAT)
+3. Extract all options (A-D for SAT, A-E if 5 options exist)
 4. EMBED ALL FORMULAS DIRECTLY IN THE STEM - do not separate them!
    Example: "stem": "If 5p + 180 = 250, what is the value of p?"
 5. Options may also contain formulas - include them inline
@@ -101,7 +101,7 @@ TRANSCRIBE_RETRY_PROMPT = """Your previous output could not be parsed as valid J
     {{
       "id": "p1_q1",
       "source": {{"pdf": "example.pdf", "page": 1}},
-      "exam": "GRE",
+      "exam": "SAT",
       "section": "Math", 
       "problem_type": "multiple_choice",
       "stem": "problem stem",
@@ -122,7 +122,7 @@ Output only JSON, no other text!"""
 # Stage S: Solve - Enhanced logic verification version
 # ============================================================
 
-SOLVE_SYSTEM_PROMPT = """You are a top GRE/SAT math expert. Your task is to solve given math problems with extreme rigor.
+SOLVE_SYSTEM_PROMPT = """You are a top SAT math expert. Your task is to solve given math problems with extreme rigor.
 
 [CRITICAL: Eliminate "Calculated Correctly but Selected Wrong Option"]
 Your main errors come from: calculating the correct number but selecting wrong option letter at the last step.
@@ -192,7 +192,7 @@ Output strict JSON format following SOLVE_SCHEMA_HINT."""
 # ============================================================
 
 # -------------------- Multiple Choice Diagnosis --------------------
-DIAGNOSE_SYSTEM_PROMPT_CHOICE = """You are a GRE math teaching expert. Your task is to analyze student's wrong answers in multiple choice questions and provide detailed error diagnosis and correction guidance.
+DIAGNOSE_SYSTEM_PROMPT_CHOICE = """You are a SAT math teaching expert. Your task is to analyze student's wrong answers in multiple choice questions and provide detailed error diagnosis and correction guidance.
 
 [Output Format]
 You must output strict JSON format:
@@ -232,7 +232,7 @@ You must output strict JSON format:
 3. how_to_get_correct: Use teaching language, step by step explanation
 4. option_analysis: At least analyze user's choice and correct option
 
-[Common GRE Math Misconception Categories]
+[Common SAT Math Misconception Categories]
 - Calculation errors: sign errors, operation order errors, decimal point errors
 - Concept confusion: formula errors, definition misunderstanding
 - Reading errors: ignoring conditions, misreading problem
@@ -263,7 +263,7 @@ Correct Solution Reference:
 Please analyze why student might have chosen wrong, provide error diagnosis and correction guidance. Output strict JSON format."""
 
 # -------------------- Numeric Entry Diagnosis --------------------
-DIAGNOSE_SYSTEM_PROMPT_NUMERIC = """You are a GRE math teaching expert. Your task is to analyze student's wrong answers in numeric entry questions and provide detailed error diagnosis and correction guidance.
+DIAGNOSE_SYSTEM_PROMPT_NUMERIC = """You are a SAT math teaching expert. Your task is to analyze student's wrong answers in numeric entry questions and provide detailed error diagnosis and correction guidance.
 
 [Problem Type Characteristics]
 Numeric entry has no options, student needs to calculate the answer (may be integer, decimal, fraction, etc.).
@@ -328,7 +328,7 @@ DIAGNOSE_USER_PROMPT_TEMPLATE = DIAGNOSE_USER_PROMPT_TEMPLATE_CHOICE
 QUESTION_SCHEMA_HINT = """{
   "id": "string",
   "source": {"pdf": "string", "page": "number"},
-  "exam": "GRE",
+  "exam": "SAT",
   "section": "Math",
   "problem_type": "multiple_choice|numeric_entry|unknown",
   "stem": "string",

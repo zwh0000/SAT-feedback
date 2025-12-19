@@ -98,7 +98,7 @@ def load_correct_answers_as_solve_results(
 
 class GREMathPipeline:
     """
-    GRE/SAT Problem Processing Pipeline
+    SAT Problem Processing Pipeline
     Coordinates PDF processing, transcription, solving, diagnosis stages
     Supports both Math (vision-based) and English (OCR-based) extraction
     """

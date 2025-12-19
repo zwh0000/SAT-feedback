@@ -1,5 +1,5 @@
 """
-GRE Math Error Classification System
+SAT Math Error Classification System
 Taxonomy used for misconception classification during the diagnosis stage
 """
 
@@ -16,7 +16,7 @@ class MisconceptionType:
     examples: list[str]
 
 
-# Common GRE Math Misconception Taxonomy
+# Common SAT Math Misconception Taxonomy
 MISCONCEPTION_TAXONOMY = {
     # Calculation Errors
     "CALC_SIGN": MisconceptionType(
@@ -161,7 +161,7 @@ def format_misconception_for_prompt(misconception: MisconceptionType) -> str:
 
 def get_all_misconceptions_prompt() -> str:
     """Retrieves all misconception types in a formatted text for prompts"""
-    lines = ["Common GRE Math Misconception Categories:"]
+    lines = ["Common SAT Math Misconception Categories:"]
     for m in MISCONCEPTION_TAXONOMY.values():
         lines.append(format_misconception_for_prompt(m))
     return "\n".join(lines)

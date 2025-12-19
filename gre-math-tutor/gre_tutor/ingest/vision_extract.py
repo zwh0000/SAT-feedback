@@ -57,7 +57,7 @@ def normalize_question_id(q_id: str, page_number: int, question_index: int) -> s
 class VisionQuestionExtractor:
     """
     Vision Question Extractor
-    Extracts structured GRE math questions from images
+    Extracts structured SAT math questions from images
     """
     
     def __init__(self, llm_client: LLMClient, logger: Optional[Logger] = None):
