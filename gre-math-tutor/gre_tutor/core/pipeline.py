@@ -143,6 +143,35 @@ class GREMathPipeline:
         os.makedirs(os.path.join(self.session_dir, "pages"), exist_ok=True)
         self.logger = create_session_logger(self.session_dir)
     
+    def _load_transcribed(self, json_path: str) -> tuple[list[Question], list[int], list[str], str]:
+        """
+        Load questions from existing transcribed.json file
+        
+        Args:
+            json_path: Path to transcribed.json file
+            
+        Returns:
+            Tuple of (questions, failed_pages, errors, pdf_name)
+        """
+        import json
+        
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        # Parse questions
+        questions = []
+        for q_data in data.get("questions", []):
+            try:
+                questions.append(Question(**q_data))
+            except Exception as e:
+                self.logger.warning(f"Failed to parse question: {e}")
+        
+        failed_pages = data.get("failed_pages", [])
+        errors = data.get("errors", [])
+        pdf_name = data.get("pdf_name", "unknown.pdf")
+        
+        return questions, failed_pages, errors, pdf_name
+    
     def run(
         self,
         pdf_path: str,
@@ -151,7 +180,8 @@ class GREMathPipeline:
         dpi: int = 300,
         answers_json: Optional[str] = None,
         correct_answers_json: Optional[str] = None,
-        interactive: bool = True
+        interactive: bool = True,
+        transcribed_json: Optional[str] = None
     ) -> SessionResult:
         """
         Run complete pipeline
@@ -164,58 +194,75 @@ class GREMathPipeline:
             answers_json: User answers JSON file path (CLI preset)
             correct_answers_json: Correct answers JSON file path (CLI preset)
             interactive: Enable interactive selection (default True)
+            transcribed_json: Load existing transcribed.json file (skip extraction)
         
         Returns:
             SessionResult object
         """
         self._init_session()
         
-        self.logger.info(f"Starting to process PDF: {pdf_path}")
         self.logger.info(f"Run mode: {mode}")
         self.logger.info(f"Subject: {self.subject}")
-        self.logger.info(f"Page range: {pages}")
         
-        pdf_name = os.path.basename(pdf_path)
-        
-        # ===== Stage 0: PDF to Images =====
-        self.logger.info("Stage 0: PDF to Images")
-        
-        try:
-            pages_dir = os.path.join(self.session_dir, "pages")
-            image_paths = pdf_to_images(
-                pdf_path=pdf_path,
-                output_dir=pages_dir,
-                pages=pages,
-                dpi=dpi
-            )
-            self.logger.info(f"Successfully converted {len(image_paths)} pages")
-        except PDFConversionError as e:
-            self.logger.error(f"PDF conversion failed: {e}")
-            raise
-        
-        # ===== Stage T: Transcribe =====
-        self.logger.info("Stage T: Transcribe")
-        
-        if self.subject == "english":
-            # English: OCR + Text LLM extraction
-            questions, failed_pages, errors = self._extract_english_questions(
-                image_paths=image_paths,
-                pdf_name=pdf_name
-            )
+        # Check if loading from existing transcribed file
+        if transcribed_json:
+            self.logger.info(f"Loading transcribed file: {transcribed_json}")
+            questions, failed_pages, errors, pdf_name = self._load_transcribed(transcribed_json)
+            # Use pdf_path if provided, otherwise use pdf_name from transcribed file
+            if not pdf_path:
+                pdf_path = pdf_name
+            self.logger.info(f"Loaded {len(questions)} questions from transcribed file")
         else:
-            # Math: Vision LLM extraction
-            extractor = VisionQuestionExtractor(self.llm, self.logger)
-            questions, failed_pages, errors = extractor.extract_from_images(
-                image_paths=image_paths,
-                pdf_name=pdf_name
-            )
-        
-        self.logger.info(f"Successfully extracted {len(questions)} questions")
+            self.logger.info(f"Starting to process PDF: {pdf_path}")
+            self.logger.info(f"Page range: {pages}")
+            
+            pdf_name = os.path.basename(pdf_path)
+            
+            # ===== Stage 0: PDF to Images =====
+            self.logger.info("Stage 0: PDF to Images")
+            
+            try:
+                pages_dir = os.path.join(self.session_dir, "pages")
+                image_paths = pdf_to_images(
+                    pdf_path=pdf_path,
+                    output_dir=pages_dir,
+                    pages=pages,
+                    dpi=dpi
+                )
+                self.logger.info(f"Successfully converted {len(image_paths)} pages")
+            except PDFConversionError as e:
+                self.logger.error(f"PDF conversion failed: {e}")
+                raise
+            
+            # ===== Stage T: Transcribe =====
+            self.logger.info("Stage T: Transcribe")
+            
+            if self.subject == "english":
+                # English: OCR + Text LLM extraction
+                questions, failed_pages, errors = self._extract_english_questions(
+                    image_paths=image_paths,
+                    pdf_name=pdf_name
+                )
+            else:
+                # Math: Vision LLM extraction
+                extractor = VisionQuestionExtractor(self.llm, self.logger)
+                questions, failed_pages, errors = extractor.extract_from_images(
+                    image_paths=image_paths,
+                    pdf_name=pdf_name
+                )
+            
+            self.logger.info(f"Successfully extracted {len(questions)} questions")
         if failed_pages:
             self.logger.warning(f"Failed pages: {failed_pages}")
         
         transcribed_path = os.path.join(self.session_dir, "transcribed.json")
-        save_transcribed(questions, transcribed_path)
+        save_transcribed(
+            questions, 
+            transcribed_path,
+            pdf_name=os.path.basename(pdf_path) if pdf_path else None,
+            failed_pages=failed_pages,
+            errors=errors
+        )
         
         if mode == "transcribe_only":
             result = create_session_output(

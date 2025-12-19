@@ -55,13 +55,34 @@ def load_json(file_path: str) -> Any:
         return json.load(f)
 
 
-def save_transcribed(questions: list[Question], file_path: str) -> None:
+def save_transcribed(
+    questions: list[Question], 
+    file_path: str,
+    pdf_name: Optional[str] = None,
+    failed_pages: Optional[list[int]] = None,
+    errors: Optional[list[str]] = None
+) -> None:
+# 必需字段
+# 字段	类型	说明
+# questions	array	题目列表
+# questions[].id	string	题目ID，如 p1_q1
+# questions[].source.pdf	string	PDF文件名
+# questions[].source.page	int	页码
+# questions[].problem_type	string	multiple_choice 或 numeric_entry
+# questions[].stem	string	题干
+# questions[].choices	object	选项 {"A": "...", "B": "...", ...}
     """Saves question extraction results"""
     data = {
         "questions": [q.model_dump() for q in questions],
         "total": len(questions),
         "timestamp": datetime.now().isoformat()
     }
+    if pdf_name:
+        data["pdf_name"] = pdf_name
+    if failed_pages:
+        data["failed_pages"] = failed_pages
+    if errors:
+        data["errors"] = errors
     save_json(data, file_path)
 
 

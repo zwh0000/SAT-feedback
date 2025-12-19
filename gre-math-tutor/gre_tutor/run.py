@@ -56,12 +56,12 @@ Examples:
         """
     )
     
-    # Required arguments
+    # PDF argument (required unless --transcribed is provided)
     parser.add_argument(
         "--pdf",
         type=str,
-        required=True,
-        help="PDF file path"
+        default=None,
+        help="PDF file path (optional if --transcribed is provided)"
     )
     
     # Optional arguments
@@ -130,6 +130,13 @@ Examples:
         help="Disable interactive selection (fully use CLI arguments)"
     )
     
+    parser.add_argument(
+        "--transcribed",
+        type=str,
+        default=None,
+        help="Load existing transcribed.json file (skip PDF conversion and extraction)"
+    )
+    
     return parser.parse_args()
 
 
@@ -149,9 +156,19 @@ def main():
     # Parse arguments
     args = parse_args()
     
-    # Validate PDF file
-    if not os.path.exists(args.pdf):
+    # Validate: either PDF or transcribed must be provided
+    if not args.pdf and not args.transcribed:
+        console.print("[red]Error: Either --pdf or --transcribed must be provided[/red]")
+        sys.exit(1)
+    
+    # Validate PDF file (if provided)
+    if args.pdf and not os.path.exists(args.pdf):
         console.print(f"[red]Error: PDF file not found: {args.pdf}[/red]")
+        sys.exit(1)
+    
+    # Validate transcribed file (if provided)
+    if args.transcribed and not os.path.exists(args.transcribed):
+        console.print(f"[red]Error: Transcribed file not found: {args.transcribed}[/red]")
         sys.exit(1)
     
     # Validate preset user answers file
@@ -166,11 +183,17 @@ def main():
     
     # Show configuration
     console.print("[bold]Run Configuration:[/bold]")
-    console.print(f"  PDF File: {args.pdf}")
+    if args.transcribed:
+        console.print(f"  Transcribed File: {args.transcribed} [yellow](skip extraction)[/yellow]")
+        if args.pdf:
+            console.print(f"  PDF File: {args.pdf} [dim](not used)[/dim]")
+    else:
+        console.print(f"  PDF File: {args.pdf}")
     console.print(f"  Subject: {args.subject} ({'Vision LLM' if args.subject == 'math' else 'OCR + Text LLM'})")
     console.print(f"  Run Mode: {args.mode}")
-    console.print(f"  Page Range: {args.pages}")
-    console.print(f"  Image DPI: {args.dpi}")
+    if not args.transcribed:
+        console.print(f"  Page Range: {args.pages}")
+        console.print(f"  Image DPI: {args.dpi}")
     console.print(f"  Output Dir: {args.outdir}")
     console.print(f"  Interactive: {'No' if args.no_interactive else 'Yes'}")
     if args.answers:
@@ -199,13 +222,14 @@ def main():
         )
         
         result = pipeline.run(
-            pdf_path=args.pdf,
+            pdf_path=args.pdf or "",
             mode=args.mode,
             pages=args.pages,
             dpi=args.dpi,
             answers_json=args.answers,
             correct_answers_json=args.correct_answers,
-            interactive=not args.no_interactive
+            interactive=not args.no_interactive,
+            transcribed_json=args.transcribed
         )
         
         console.print("\n[green]Processing complete![/green]")

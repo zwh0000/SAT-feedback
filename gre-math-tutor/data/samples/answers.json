@@ -1,8 +1,33 @@
 {
-  "p1_q1": "A",
-  "p1_q2": "B",
-  "p1_q3": "C",
-  "p2_q1": "D",
-  "p2_q2": "E"
+  "questions": [
+    {
+      "id": "p1_q1",
+      "source": {
+        "pdf": "test.pdf",
+        "page": 1
+      },
+      "exam": "SAT",
+      "section": "Math",
+      "problem_type": "multiple_choice",
+      "stem": "题干内容...",
+      "choices": {
+        "A": "选项A内容",
+        "B": "选项B内容",
+        "C": "选项C内容",
+        "D": "选项D内容"
+      },
+      "latex_equations": [],
+      "diagram_description": null,
+      "constraints": [],
+      "passage_context": null,
+      "question_category": null,
+      "uncertain_spans": [],
+      "confidence": 0.95
+    }
+  ],
+  "total": 10,
+  "timestamp": "2025-12-18T22:53:52",
+  "pdf_name": "test.pdf",
+  "failed_pages": [],
+  "errors": []
 }
-
