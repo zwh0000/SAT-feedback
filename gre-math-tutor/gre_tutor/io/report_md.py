@@ -56,6 +56,18 @@ def generate_report_md(result: SessionResult) -> str:
         if result.incorrect_ids:
             lines.append(f"- **Wrong Questions**: {', '.join(result.incorrect_ids)}")
         
+        # Mode C scaffolded tutoring statistics
+        if result.first_attempt_wrong_count > 0:
+            lines.append("")
+            lines.append("### Scaffolded Tutoring (Mode C) Statistics")
+            lines.append(f"- **First Attempt Wrong**: {result.first_attempt_wrong_count} questions")
+            lines.append(f"- **Questions**: {', '.join(result.first_attempt_wrong_ids)}")
+            # Calculate how many got it right on second attempt
+            recovered = sum(1 for dr in result.diagnose_results 
+                          if dr.first_attempt_wrong and dr.is_correct)
+            if recovered > 0:
+                lines.append(f"- **Recovered on 2nd Attempt**: {recovered} questions")
+        
         lines.append("")
         lines.append("---")
         lines.append("")
@@ -107,7 +119,14 @@ def generate_report_md(result: SessionResult) -> str:
         
         # Answer info
         if diagnose:
-            lines.append(f"**User Answer**: {diagnose.user_answer} | **Correct Answer**: {diagnose.correct_answer}")
+            # Check if this was a Mode C scaffolded tutoring session
+            if diagnose.first_attempt and diagnose.first_attempt_wrong:
+                lines.append(f"**First Attempt (wrong)**: {diagnose.first_attempt}")
+                lines.append(f"**Second Attempt**: {diagnose.user_answer} | **Correct Answer**: {diagnose.correct_answer}")
+                if diagnose.is_correct:
+                    lines.append("*Note: Student got it right on second attempt after hints*")
+            else:
+                lines.append(f"**User Answer**: {diagnose.user_answer} | **Correct Answer**: {diagnose.correct_answer}")
             lines.append("")
         elif solve:
             lines.append(f"**Correct Answer**: {solve.correct_answer}")

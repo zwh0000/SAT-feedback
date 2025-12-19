@@ -455,3 +455,161 @@ def merge_answers(
         if overwrite or q_id not in result:
             result[q_id] = answer
     return result
+
+
+# ============================================================
+# Diagnosis Mode Selection
+# ============================================================
+
+DiagnoseMode = str  # "A", "B", or "C"
+
+
+def ask_diagnose_mode() -> DiagnoseMode:
+    """
+    Ask user to choose diagnosis mode
+    
+    Returns:
+        Diagnosis mode: "A", "B", or "C"
+    """
+    from rich.console import Console
+    from rich.prompt import Prompt
+    from rich.panel import Panel
+    
+    console = Console()
+    
+    console.print("\n" + "="*70, style="magenta")
+    console.print("Diagnosis Mode Selection", style="bold magenta")
+    console.print("="*70, style="magenta")
+    
+    mode_descriptions = """
+[bold cyan]Condition A: Direct Solution[/bold cyan]
+  - Show correct answer directly
+  - Complete step-by-step solution
+  - One-sentence summary
+  [dim]Best for: Quick review, time-limited sessions[/dim]
+
+[bold yellow]Condition B: Contrastive Explanation (Current Default)[/bold yellow]
+  - Analyze why the wrong answer seems tempting
+  - Explain what went wrong
+  - Show correct solution with comparison
+  [dim]Best for: Understanding common mistakes[/dim]
+
+[bold green]Condition C: Scaffolded Tutoring[/bold green]
+  - First give hints (without revealing answer)
+  - Student gets a second chance to answer
+  - Then reveal full solution and analysis
+  [dim]Best for: Deep learning, building problem-solving skills[/dim]
+"""
+    
+    console.print(Panel(mode_descriptions, title="Choose a Mode", border_style="magenta"))
+    
+    choice = Prompt.ask(
+        "[magenta]Please choose diagnosis mode[/magenta]",
+        choices=["A", "B", "C", "a", "b", "c"],
+        default="B"
+    )
+    
+    return choice.upper()
+
+
+def collect_second_attempt(
+    question: Question,
+    first_answer: str,
+    hint_result: dict
+) -> str:
+    """
+    For Condition C: Collect student's second attempt after showing hints
+    
+    Args:
+        question: The question
+        first_answer: Student's first answer
+        hint_result: The hint/error analysis from LLM
+    
+    Returns:
+        Student's second attempt answer
+    """
+    from rich.console import Console
+    from rich.prompt import Prompt
+    from rich.panel import Panel
+    
+    console = Console(width=100)
+    
+    console.print("\n" + "="*70, style="yellow")
+    console.print("Second Chance - Try Again!", style="bold yellow")
+    console.print("="*70, style="yellow")
+    
+    # Show the question again
+    stem_wrapped = wrap_text(question.stem, width=65)
+    console.print(Panel(stem_wrapped, title="[bold]Question[/bold]", border_style="cyan"))
+    
+    # Show options
+    is_numeric = question.problem_type == "numeric_entry"
+    if not is_numeric and question.choices:
+        console.print()
+        for opt in ['A', 'B', 'C', 'D', 'E']:
+            content = question.choices.get(opt)
+            if content and content not in ["N/A", "UNKNOWN", None]:
+                console.print(f"  [yellow]{opt}[/yellow]: {content}")
+    
+    # Show error analysis
+    console.print()
+    console.print(Panel(
+        f"[bold red]Your first answer:[/bold red] {first_answer}\n\n" +
+        f"[bold]Error Analysis:[/bold]\n{hint_result.get('error_analysis', 'N/A')}\n\n" +
+        f"[bold]Key Concept:[/bold]\n{hint_result.get('key_concept_reminder', 'N/A')}",
+        title="[bold yellow]Feedback[/bold yellow]",
+        border_style="yellow"
+    ))
+    
+    # Show actionable hints (new format with step/action/evidence/question/expected_conclusion)
+    actionable_hints = hint_result.get('actionable_hints', [])
+    if actionable_hints:
+        console.print("\n[bold cyan]Next Steps to Try:[/bold cyan]")
+        for hint in actionable_hints:
+            step_num = hint.get('step_number', '?')
+            action = hint.get('action', '')
+            evidence = hint.get('evidence_location', '')
+            guiding_q = hint.get('guiding_question', '')
+            expected_conclusion = hint.get('expected_conclusion', '')
+            
+            console.print(f"\n  [bold]Step {step_num}:[/bold] {action}")
+            if evidence:
+                console.print(f"    [dim]Where to look:[/dim] {evidence}")
+            if guiding_q:
+                console.print(f"    [italic cyan]Think:[/italic cyan] {guiding_q}")
+            if expected_conclusion:
+                console.print(f"    [bold green]What you should understand:[/bold green] {expected_conclusion}")
+    else:
+        # Fallback to old hints format
+        hints = hint_result.get('hints', [])
+        if hints:
+            console.print("\n[bold cyan]Hints:[/bold cyan]")
+            for i, hint in enumerate(hints, 1):
+                console.print(f"  {i}. {hint}")
+    
+    # Show encouragement
+    try_again = hint_result.get('try_again_prompt', 'Take your time and try again!')
+    console.print(f"\n[green]{try_again}[/green]\n")
+    
+    # Collect second attempt
+    while True:
+        if is_numeric:
+            prompt_text = "[green]Your second answer (number/fraction)[/green]"
+        else:
+            prompt_text = "[green]Your second answer (A-E)[/green]"
+        
+        answer = Prompt.ask(prompt_text, default="", show_default=False)
+        answer = answer.strip()
+        
+        if answer == '':
+            console.print("[dim]Keeping first answer[/dim]")
+            return first_answer
+        
+        if is_numeric:
+            return answer
+        else:
+            answer_upper = answer.upper()
+            if answer_upper in ['A', 'B', 'C', 'D', 'E']:
+                return answer_upper
+            else:
+                console.print("[red]Please enter one of A-E[/red]")

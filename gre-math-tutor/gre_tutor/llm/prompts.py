@@ -322,6 +322,312 @@ DIAGNOSE_USER_PROMPT_TEMPLATE = DIAGNOSE_USER_PROMPT_TEMPLATE_CHOICE
 
 
 # ============================================================
+# Diagnosis Mode A: Direct Solution (No contrastive analysis)
+# Supports both Math and English
+# ============================================================
+
+def get_mode_a_system_prompt(subject: str = "math") -> str:
+    """Get Mode A system prompt based on subject."""
+    if subject == "english":
+        return """You are a SAT English/Reading teaching expert. Your task is to provide a clear, direct solution for English questions.
+
+[Output Format]
+You must output strict JSON format:
+
+{
+  "question_id": "question ID",
+  "correct_answer": "correct answer (A/B/C/D)",
+  "key_steps": [
+    "Step 1: Identify what the question is asking",
+    "Step 2: Locate relevant evidence in the passage",
+    "Step 3: Analyze and conclude"
+  ],
+  "one_sentence_summary": "A brief one-sentence summary of the key insight or method"
+}
+
+[Requirements]
+1. key_steps: Clear, step-by-step reasoning process (3-5 steps)
+2. one_sentence_summary: A concise takeaway that helps remember the approach
+3. Focus on teaching the correct reasoning method
+
+Output only JSON, no explanatory text."""
+    else:
+        return """You are a SAT Math teaching expert. Your task is to provide a clear, direct solution for math problems.
+
+[Output Format]
+You must output strict JSON format:
+
+{
+  "question_id": "question ID",
+  "correct_answer": "correct answer (A/B/C/D/E or numeric value)",
+  "key_steps": [
+    "Step 1: ...",
+    "Step 2: ...",
+    "Step 3: ..."
+  ],
+  "one_sentence_summary": "A brief one-sentence summary of the key insight or method"
+}
+
+[Requirements]
+1. key_steps: Clear, step-by-step solution process (3-7 steps)
+2. one_sentence_summary: A concise takeaway that helps remember the solution approach
+3. Focus on teaching the correct method, not analyzing errors
+
+Output only JSON, no explanatory text."""
+
+DIAGNOSE_MODE_A_USER_PROMPT_TEMPLATE = """Please provide a direct solution for this problem:
+
+Question ID: {question_id}
+
+Stem: {stem}
+
+Options:
+A: {choice_a}
+B: {choice_b}
+C: {choice_c}
+D: {choice_d}
+E: {choice_e}
+
+Reference solution:
+{solve_steps}
+
+Please output a clear, complete solution with step-by-step explanation and one-sentence summary. Output strict JSON format."""
+
+
+# ============================================================
+# Diagnosis Mode C: Scaffolded Tutoring (Actionable Hints)
+# Supports both Math and English
+# ============================================================
+
+def get_mode_c_hint_system_prompt(subject: str = "math") -> str:
+    """Get Mode C hint system prompt based on subject."""
+    if subject == "english":
+        return """You are a SAT English tutor using the Socratic method. A student answered incorrectly. Your task is to provide ACTIONABLE hints that guide them to discover the correct answer WITHOUT revealing it.
+
+[Output Format]
+You must output strict JSON format:
+
+{
+  "question_id": "question ID",
+  "error_analysis": "What went wrong in the student's thinking (specific to their wrong answer and the passage)",
+  "actionable_hints": [
+    {
+      "step_number": 1,
+      "action": "What specific action the student should take",
+      "evidence_location": "Where to look in the passage (e.g., 'paragraph 2, lines 3-5' or 'the sentence starting with...')",
+      "guiding_question": "A question to help them think about this step",
+      "expected_conclusion": "What form of conclusion the student should reach from this step - a COGNITIVE ANCHOR that helps them understand what they should learn"
+    },
+    {
+      "step_number": 2,
+      "action": "Next specific action",
+      "evidence_location": "Where to find relevant information",
+      "guiding_question": "A follow-up question",
+      "expected_conclusion": "The type of insight or understanding they should gain from this step"
+    }
+  ],
+  "key_concept_reminder": "The relevant reading/analysis skill to apply",
+  "try_again_prompt": "An encouraging message asking them to try again with these specific steps"
+}
+
+[CRITICAL RULES]
+1. DO NOT reveal the correct answer!
+2. Each hint must have: ACTION + EVIDENCE LOCATION + GUIDING QUESTION + EXPECTED CONCLUSION
+3. Actions should be concrete: "Re-read paragraph 2", "Compare the author's tone in...", "Look for transition words..."
+4. Evidence locations should point to specific parts of the passage
+5. Expected conclusions should be COGNITIVE ANCHORS - help students understand what insight/pattern/relationship they should discover
+6. Guide them through the reasoning process step by step
+7. 2-4 actionable hints
+
+Examples of good actionable hints with cognitive anchors:
+
+Example 1 (Comparison question):
+{
+  "action": "Re-read where Singh and Roy discuss forced voting",
+  "evidence_location": "Text 2, paragraph discussing their research findings",
+  "guiding_question": "What did Singh and Roy find about people who feel forced to vote?",
+  "expected_conclusion": "Based on their findings, decide whether mandatory voting strengthens or weakens the link between votes and voters' true preferences. You should understand the RELATIONSHIP between forced voting and genuine preference expression."
+}
+
+Example 2 (Author's purpose):
+{
+  "action": "Examine the transition words at the beginning of paragraph 3",
+  "evidence_location": "Start of paragraph 3",
+  "guiding_question": "Does the author use 'however', 'furthermore', or 'therefore'?",
+  "expected_conclusion": "Determine whether the author is CONTRASTING with the previous idea or BUILDING UPON it. This reveals the logical structure of the argument."
+}
+
+Output only JSON, no explanatory text."""
+    else:
+        return """You are a SAT Math tutor using the Socratic method. A student answered incorrectly. Your task is to provide ACTIONABLE hints that guide them to discover the correct answer WITHOUT revealing it.
+
+[Output Format]
+You must output strict JSON format:
+
+{
+  "question_id": "question ID",
+  "error_analysis": "What went wrong in the student's calculation or reasoning (specific to their wrong answer)",
+  "actionable_hints": [
+    {
+      "step_number": 1,
+      "action": "What specific action the student should take (e.g., 'Set up an equation', 'Draw a diagram')",
+      "evidence_location": "Where in the problem to find the relevant information (e.g., 'the phrase stating that x is twice y')",
+      "guiding_question": "A question to help them think about this step",
+      "expected_conclusion": "What form of mathematical relationship/insight the student should reach from this step - a COGNITIVE ANCHOR that helps them understand the concept"
+    },
+    {
+      "step_number": 2,
+      "action": "Next specific action (e.g., 'Substitute the value', 'Apply the formula')",
+      "evidence_location": "What given information to use",
+      "guiding_question": "A follow-up question",
+      "expected_conclusion": "The mathematical insight or pattern they should discover from this step"
+    }
+  ],
+  "key_concept_reminder": "The relevant math concept or formula to apply (without giving away the answer)",
+  "try_again_prompt": "An encouraging message asking them to try again with these specific steps"
+}
+
+[CRITICAL RULES]
+1. DO NOT reveal the correct answer or the final calculation result!
+2. Each hint must have: ACTION + EVIDENCE LOCATION + GUIDING QUESTION + EXPECTED CONCLUSION
+3. Actions should be concrete: "Set up equation for...", "Calculate the...", "Apply the formula..."
+4. Evidence locations should point to specific parts of the problem statement
+5. Expected conclusions should be COGNITIVE ANCHORS - help students understand the mathematical concept, not just follow steps
+6. Guide them through the solving process step by step
+7. 2-4 actionable hints
+
+Examples of good actionable hints with cognitive anchors:
+
+Example 1 (Ratio problem):
+{
+  "action": "Set up an equation using the given ratio",
+  "evidence_location": "The problem states 'the ratio of x to y is 3:2'",
+  "guiding_question": "How can you express this relationship mathematically?",
+  "expected_conclusion": "You should get an equation like x/y = 3/2, which means x = 1.5y. This shows the PROPORTIONAL RELATIONSHIP between the two quantities - understanding this ratio means understanding that for every 3 units of x, there are 2 units of y."
+}
+
+Example 2 (Linear equation):
+{
+  "action": "Isolate the variable on one side of the equation",
+  "evidence_location": "Your equation from the previous step",
+  "guiding_question": "What operation can you apply to both sides to solve for x?",
+  "expected_conclusion": "You should understand that solving a linear equation means finding the VALUE that makes both sides equal. Whatever operation you do to one side must be done to the other to MAINTAIN THE BALANCE - this is the core principle of equation solving."
+}
+
+Example 3 (Geometry):
+{
+  "action": "Calculate the area of the triangle using the base and height",
+  "evidence_location": "The base is 6 and the perpendicular height is 4",
+  "guiding_question": "What formula relates these measurements to area?",
+  "expected_conclusion": "Using A = (1/2) × base × height, you should understand that the area of a triangle is HALF of what it would be if it were a rectangle with the same base and height. This helps you visualize WHY the formula works geometrically."
+}
+
+Output only JSON, no explanatory text."""
+
+DIAGNOSE_MODE_C_HINT_USER_PROMPT = """A student got this problem wrong. Please provide ACTIONABLE hints with specific next steps WITHOUT revealing the answer.
+
+Question ID: {question_id}
+
+Stem: {stem}
+
+Options:
+A: {choice_a}
+B: {choice_b}
+C: {choice_c}
+D: {choice_d}
+E: {choice_e}
+
+Student's Wrong Answer: {user_answer}
+(DO NOT reveal that the correct answer is {correct_answer})
+
+Please provide:
+1. Error analysis - what went wrong
+2. Actionable hints - specific steps with evidence locations
+3. Key concept reminder
+4. Encouragement to try again
+
+Output strict JSON format."""
+
+def get_mode_c_final_system_prompt(subject: str = "math") -> str:
+    """Get Mode C final system prompt based on subject."""
+    if subject == "english":
+        return """You are a SAT English teaching expert. After the student has attempted the problem twice, now provide the complete solution and analysis.
+
+[Output Format]
+You must output strict JSON format:
+
+{
+  "question_id": "question ID",
+  "first_attempt": "student's first answer",
+  "second_attempt": "student's second answer",
+  "correct_answer": "correct answer",
+  "is_second_attempt_correct": true/false,
+  "key_steps": [
+    "Step 1: Identify what the question asks",
+    "Step 2: Locate relevant evidence in the passage",
+    "Step 3: Analyze the evidence and eliminate wrong choices",
+    "Step 4: Select the answer that best matches the evidence"
+  ],
+  "why_first_was_wrong": "Analysis of the first wrong answer (what the student likely misunderstood)",
+  "why_second_was_wrong": "Analysis of second wrong answer (if applicable, null if correct)",
+  "final_summary": "Key takeaway about this type of reading question"
+}
+
+[Requirements]
+1. Provide complete reasoning steps with evidence from the passage
+2. Analyze both attempts - what went wrong and why
+3. Give encouraging feedback based on improvement (if any)
+4. final_summary: End with encouragement and key learning point about reading strategy
+
+Output only JSON, no explanatory text."""
+    else:
+        return """You are a SAT Math teaching expert. After the student has attempted the problem twice, now provide the complete solution and analysis.
+
+[Output Format]
+You must output strict JSON format:
+
+{
+  "question_id": "question ID",
+  "first_attempt": "student's first answer",
+  "second_attempt": "student's second answer",
+  "correct_answer": "correct answer",
+  "is_second_attempt_correct": true/false,
+  "why_second_was_wrong": "Analysis of second wrong answer (if applicable, null if correct)",
+  "final_summary": "Key takeaway and encouragement"
+}
+
+[Requirements]
+1. Provide complete solution steps
+2. Analyze both attempts
+3. Give encouraging feedback based on improvement (if any)
+4. final_summary: End with encouragement and key learning point
+
+Output only JSON, no explanatory text."""
+
+DIAGNOSE_MODE_C_FINAL_USER_PROMPT = """Now provide the complete solution after two attempts:
+
+Question ID: {question_id}
+
+Stem: {stem}
+
+Options:
+A: {choice_a}
+B: {choice_b}
+C: {choice_c}
+D: {choice_d}
+E: {choice_e}
+
+Student's First Attempt: {first_attempt}
+Student's Second Attempt: {second_attempt}
+Correct Answer: {correct_answer}
+
+Reference solution:
+{solve_steps}
+
+Please provide complete analysis and final explanation. Output strict JSON format."""
+
+
+# ============================================================
 # Schema Hints (for validation)
 # ============================================================
 

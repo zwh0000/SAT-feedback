@@ -95,6 +95,16 @@ class DiagnoseResult(BaseModel):
     correct_answer: str
     is_correct: bool
     
+    # Mode C scaffolded tutoring fields
+    first_attempt: Optional[str] = Field(
+        None,
+        description="Student's first attempt answer (if Mode C scaffolded tutoring was used)"
+    )
+    first_attempt_wrong: bool = Field(
+        False,
+        description="True if the first attempt was wrong (even if second attempt was correct)"
+    )
+    
     # Diagnosis content (populated only when the answer is incorrect)
     why_user_choice_is_tempting: Optional[str] = Field(
         None, 
@@ -142,4 +152,14 @@ class SessionResult(BaseModel):
     total_questions: int = 0
     answered_questions: int = 0
     correct_count: int = 0
+    
+    # Mode C scaffolded tutoring statistics
+    first_attempt_wrong_count: int = Field(
+        0, 
+        description="Number of questions where first attempt was wrong (Mode C)"
+    )
+    first_attempt_wrong_ids: list[str] = Field(
+        default_factory=list,
+        description="Question IDs where first attempt was wrong"
+    )
     incorrect_ids: list[str] = Field(default_factory=list)

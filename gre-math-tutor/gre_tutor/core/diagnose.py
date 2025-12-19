@@ -13,8 +13,19 @@ from ..llm.prompts import (
     DIAGNOSE_USER_PROMPT_TEMPLATE_CHOICE,
     DIAGNOSE_SYSTEM_PROMPT_NUMERIC,
     DIAGNOSE_USER_PROMPT_TEMPLATE_NUMERIC,
-    DIAGNOSE_SCHEMA_HINT
+    DIAGNOSE_SCHEMA_HINT,
+    # Mode A: Direct Solution (function-based for subject support)
+    get_mode_a_system_prompt,
+    DIAGNOSE_MODE_A_USER_PROMPT_TEMPLATE,
+    # Mode C: Scaffolded Tutoring (function-based for subject support)
+    get_mode_c_hint_system_prompt,
+    DIAGNOSE_MODE_C_HINT_USER_PROMPT,
+    get_mode_c_final_system_prompt,
+    DIAGNOSE_MODE_C_FINAL_USER_PROMPT
 )
+
+# Type alias for diagnosis mode
+DiagnoseMode = str  # "A", "B", or "C"
 from .models import Question, SolveResult, DiagnoseResult, OptionAnalysis
 from .validators import validate_diagnose_result, extract_json_from_text
 from ..utils.logging import Logger
@@ -86,18 +97,21 @@ class ErrorDiagnoser:
     Error Diagnoser
     Analyzes user errors and provides diagnosis and corrective guidance.
     Supports Multiple Choice and Numeric Entry.
+    Supports both Math and English subjects.
     """
     
-    def __init__(self, llm_client: LLMClient, logger: Optional[Logger] = None):
+    def __init__(self, llm_client: LLMClient, logger: Optional[Logger] = None, subject: str = "math"):
         """
         Initializes the diagnoser.
         
         Args:
             llm_client: LLM Client.
             logger: Logger instance.
+            subject: "math" or "english" - determines which prompts to use
         """
         self.llm = llm_client
         self.logger = logger
+        self.subject = subject
     
     def _log(self, message: str, level: str = "info"):
         """Log a message."""
@@ -455,7 +469,8 @@ class ErrorDiagnoser:
         self,
         questions: list[Question],
         solve_results: list[SolveResult],
-        user_answers: dict[str, str]
+        user_answers: dict[str, str],
+        mode: DiagnoseMode = "B"
     ) -> tuple[list[DiagnoseResult], list[str]]:
         """
         Batch diagnosis.
@@ -464,6 +479,7 @@ class ErrorDiagnoser:
             questions: List of Question objects.
             solve_results: List of SolveResult objects.
             user_answers: Dictionary of user answers {question_id: answer}.
+            mode: Diagnosis mode - "A" (direct), "B" (contrastive), "C" (scaffolded)
         
         Returns:
             (List of DiagnoseResult, List of error messages)
@@ -487,10 +503,367 @@ class ErrorDiagnoser:
                 errors.append(f"Missing solving result for question {question.id}")
                 continue
             
-            result, error = self.diagnose(question, solve_result, user_answer)
+            # Mode A: Direct Solution (no contrastive analysis)
+            if mode == "A":
+                result, error = self.diagnose_mode_a(question, solve_result, user_answer)
+            # Mode C: Scaffolded (handled separately in pipeline)
+            elif mode == "C":
+                # For batch, we just do regular diagnosis
+                # Scaffolded mode requires interactive handling
+                result, error = self.diagnose(question, solve_result, user_answer)
+            # Mode B: Contrastive (default, current behavior)
+            else:
+                result, error = self.diagnose(question, solve_result, user_answer)
+            
             if result:
                 results.append(result)
             if error:
                 errors.append(error)
         
         return results, errors
+    
+    # ============================================================
+    # Mode A: Direct Solution
+    # ============================================================
+    
+    def diagnose_mode_a(
+        self,
+        question: Question,
+        solve_result: SolveResult,
+        user_answer: str
+    ) -> tuple[Optional[DiagnoseResult], Optional[str]]:
+        """
+        Mode A: Direct Solution - Just provide solution without error analysis.
+        
+        Args:
+            question: Question object.
+            solve_result: Result from the solver.
+            user_answer: User's submitted answer.
+        
+        Returns:
+            (DiagnoseResult, Error message or None)
+        """
+        user_answer = user_answer.strip()
+        correct_answer = solve_result.correct_answer.strip()
+        problem_type = question.problem_type
+        
+        is_correct = self._check_answer_correct(user_answer, correct_answer, problem_type)
+        
+        self._log(f"[Mode A] Diagnosing question {question.id}. User: {user_answer}, Correct: {correct_answer}")
+        
+        # Prepare solving steps
+        solve_steps = "\n".join([f"{i+1}. {step}" for i, step in enumerate(solve_result.key_steps)])
+        
+        # If correct, simple success result
+        if is_correct:
+            return DiagnoseResult(
+                question_id=question.id,
+                user_answer=user_answer.upper() if problem_type != "numeric_entry" else user_answer,
+                correct_answer=correct_answer.upper() if problem_type != "numeric_entry" else correct_answer,
+                is_correct=True,
+                why_user_choice_is_tempting=None,
+                likely_misconceptions=[],
+                how_to_get_correct=solve_steps,
+                option_analysis=[]
+            ), None
+        
+        # For incorrect answers, generate direct solution
+        choices = question.choices
+        
+        user_prompt = DIAGNOSE_MODE_A_USER_PROMPT_TEMPLATE.format(
+            question_id=question.id,
+            stem=question.stem,
+            choice_a=choices.get("A", "N/A"),
+            choice_b=choices.get("B", "N/A"),
+            choice_c=choices.get("C", "N/A"),
+            choice_d=choices.get("D", "N/A"),
+            choice_e=choices.get("E", "N/A"),
+            solve_steps=solve_steps
+        )
+        
+        response = self.llm.generate_json(
+            system_prompt=get_mode_a_system_prompt(self.subject),
+            user_prompt=user_prompt,
+            temperature=0.3
+        )
+        
+        if not response.success or not response.content:
+            # Fallback to simple result
+            return DiagnoseResult(
+                question_id=question.id,
+                user_answer=user_answer.upper() if problem_type != "numeric_entry" else user_answer,
+                correct_answer=correct_answer.upper() if problem_type != "numeric_entry" else correct_answer,
+                is_correct=False,
+                why_user_choice_is_tempting=None,
+                likely_misconceptions=[],
+                how_to_get_correct=f"The correct answer is {correct_answer}.\n\n{solve_steps}",
+                option_analysis=[]
+            ), None
+        
+        try:
+            data = json.loads(response.content)
+            key_steps = data.get("key_steps", solve_result.key_steps)
+            summary = data.get("one_sentence_summary", solve_result.final_reason)
+            
+            return DiagnoseResult(
+                question_id=question.id,
+                user_answer=user_answer.upper() if problem_type != "numeric_entry" else user_answer,
+                correct_answer=correct_answer.upper() if problem_type != "numeric_entry" else correct_answer,
+                is_correct=False,
+                why_user_choice_is_tempting=None,
+                likely_misconceptions=[],
+                how_to_get_correct="\n".join(key_steps) + f"\n\n**Summary:** {summary}",
+                option_analysis=[]
+            ), None
+        except Exception as e:
+            self._log(f"[Mode A] Parse error: {e}", "warning")
+            return DiagnoseResult(
+                question_id=question.id,
+                user_answer=user_answer.upper() if problem_type != "numeric_entry" else user_answer,
+                correct_answer=correct_answer.upper() if problem_type != "numeric_entry" else correct_answer,
+                is_correct=False,
+                why_user_choice_is_tempting=None,
+                likely_misconceptions=[],
+                how_to_get_correct=f"The correct answer is {correct_answer}.\n\n{solve_steps}",
+                option_analysis=[]
+            ), None
+    
+    # ============================================================
+    # Mode C: Scaffolded Tutoring
+    # ============================================================
+    
+    def get_hint_for_wrong_answer(
+        self,
+        question: Question,
+        solve_result: SolveResult,
+        user_answer: str
+    ) -> dict:
+        """
+        Mode C Step 1: Generate hints without revealing the answer.
+        
+        Args:
+            question: Question object.
+            solve_result: Result from the solver.
+            user_answer: User's wrong answer.
+        
+        Returns:
+            Dict with hints and error analysis (without revealing answer)
+        """
+        user_answer = user_answer.strip()
+        correct_answer = solve_result.correct_answer.strip()
+        
+        self._log(f"[Mode C] Generating hints for question {question.id}")
+        
+        choices = question.choices
+        
+        user_prompt = DIAGNOSE_MODE_C_HINT_USER_PROMPT.format(
+            question_id=question.id,
+            stem=question.stem,
+            choice_a=choices.get("A", "N/A"),
+            choice_b=choices.get("B", "N/A"),
+            choice_c=choices.get("C", "N/A"),
+            choice_d=choices.get("D", "N/A"),
+            choice_e=choices.get("E", "N/A"),
+            user_answer=user_answer,
+            correct_answer=correct_answer
+        )
+        
+        response = self.llm.generate_json(
+            system_prompt=get_mode_c_hint_system_prompt(self.subject),
+            user_prompt=user_prompt,
+            temperature=0.4
+        )
+        
+        if not response.success or not response.content:
+            # Fallback hints with actionable format
+            if self.subject == "english":
+                return {
+                    "question_id": question.id,
+                    "error_analysis": "Your answer might have misinterpreted the passage or question.",
+                    "actionable_hints": [
+                        {
+                            "step_number": 1,
+                            "action": "Re-read the question to identify exactly what is being asked",
+                            "evidence_location": "Look at the question stem carefully",
+                            "guiding_question": "What specific information is the question asking for?",
+                            "expected_conclusion": "You should understand the EXACT RELATIONSHIP or COMPARISON the question wants you to identify. This helps you focus your search in the passage."
+                        },
+                        {
+                            "step_number": 2,
+                            "action": "Locate the relevant section in the passage",
+                            "evidence_location": "Find where the key information appears",
+                            "guiding_question": "Where does the passage address this topic?",
+                            "expected_conclusion": "You should identify the DIRECT EVIDENCE from the text that answers the question. Understanding how to locate evidence is a key reading skill."
+                        }
+                    ],
+                    "key_concept_reminder": "Make sure to find direct evidence in the passage.",
+                    "try_again_prompt": "Take another look with these steps in mind!"
+                }
+            else:
+                return {
+                    "question_id": question.id,
+                    "error_analysis": "Your answer might have involved a calculation or conceptual error.",
+                    "actionable_hints": [
+                        {
+                            "step_number": 1,
+                            "action": "Re-read the problem and identify all given information",
+                            "evidence_location": "Look at the numbers and conditions stated in the problem",
+                            "guiding_question": "What are all the values and relationships given?",
+                            "expected_conclusion": "You should identify ALL the KNOWN VALUES and CONSTRAINTS. Understanding what you know is the first step in solving any math problem."
+                        },
+                        {
+                            "step_number": 2,
+                            "action": "Set up the appropriate equation or relationship",
+                            "evidence_location": "Use the constraints mentioned in the problem",
+                            "guiding_question": "How can you express the unknown in terms of the given information?",
+                            "expected_conclusion": "You should understand how to TRANSLATE WORDS INTO MATHEMATICAL EXPRESSIONS. This is the bridge between understanding a problem and solving it."
+                        }
+                    ],
+                    "key_concept_reminder": "Make sure you understand all the given information.",
+                    "try_again_prompt": "Take another look and try again!"
+                }
+        
+        try:
+            data = json.loads(response.content)
+            # Ensure we have the new actionable_hints format, or convert from old hints format
+            if "actionable_hints" not in data and "hints" in data:
+                # Convert old format to new format
+                hints = data.get("hints", [])
+                data["actionable_hints"] = [
+                    {
+                        "step_number": i + 1,
+                        "action": hint,
+                        "evidence_location": "See the problem statement",
+                        "guiding_question": "Think about this carefully.",
+                        "expected_conclusion": "Consider what insight or pattern this step should reveal."
+                    }
+                    for i, hint in enumerate(hints)
+                ]
+            return data
+        except Exception:
+            return {
+                "question_id": question.id,
+                "error_analysis": "Your answer might have involved an error.",
+                "actionable_hints": [
+                    {
+                        "step_number": 1,
+                        "action": "Re-read the problem carefully",
+                        "evidence_location": "Check all the given information",
+                        "guiding_question": "What might you have missed?",
+                        "expected_conclusion": "You should identify all the key information and relationships stated in the problem."
+                    }
+                ],
+                "key_concept_reminder": "Review the key concepts involved.",
+                "try_again_prompt": "Give it another try!"
+            }
+    
+    def diagnose_after_second_attempt(
+        self,
+        question: Question,
+        solve_result: SolveResult,
+        first_attempt: str,
+        second_attempt: str
+    ) -> tuple[Optional[DiagnoseResult], Optional[str]]:
+        """
+        Mode C Step 2: Full diagnosis after second attempt.
+        
+        Args:
+            question: Question object.
+            solve_result: Result from the solver.
+            first_attempt: User's first wrong answer.
+            second_attempt: User's second attempt.
+        
+        Returns:
+            (DiagnoseResult, Error message or None)
+        """
+        correct_answer = solve_result.correct_answer.strip()
+        problem_type = question.problem_type
+        
+        is_second_correct = self._check_answer_correct(second_attempt, correct_answer, problem_type)
+        
+        self._log(f"[Mode C] Final diagnosis for question {question.id}. First: {first_attempt}, Second: {second_attempt}, Correct: {correct_answer}")
+        
+        solve_steps = "\n".join([f"{i+1}. {step}" for i, step in enumerate(solve_result.key_steps)])
+        choices = question.choices
+        
+        user_prompt = DIAGNOSE_MODE_C_FINAL_USER_PROMPT.format(
+            question_id=question.id,
+            stem=question.stem,
+            choice_a=choices.get("A", "N/A"),
+            choice_b=choices.get("B", "N/A"),
+            choice_c=choices.get("C", "N/A"),
+            choice_d=choices.get("D", "N/A"),
+            choice_e=choices.get("E", "N/A"),
+            first_attempt=first_attempt,
+            second_attempt=second_attempt,
+            correct_answer=correct_answer,
+            solve_steps=solve_steps
+        )
+        
+        response = self.llm.generate_json(
+            system_prompt=get_mode_c_final_system_prompt(self.subject),
+            user_prompt=user_prompt,
+            temperature=0.3
+        )
+        
+        # First attempt was ALWAYS wrong in Mode C (that's why we're here)
+        # Even if second attempt is correct, we still mark first_attempt_wrong = True
+        first_attempt_wrong = True
+        
+        if not response.success or not response.content:
+            # Fallback result
+            improvement = "improved" if is_second_correct else "still needs practice"
+            return DiagnoseResult(
+                question_id=question.id,
+                user_answer=second_attempt,
+                correct_answer=correct_answer,
+                is_correct=is_second_correct,
+                first_attempt=first_attempt,
+                first_attempt_wrong=first_attempt_wrong,
+                why_user_choice_is_tempting=f"First attempt was wrong: {first_attempt}",
+                likely_misconceptions=["Review the solution steps carefully"],
+                how_to_get_correct=f"The correct answer is {correct_answer}.\n\n{solve_steps}\n\nYou {improvement} on the second try!",
+                option_analysis=[]
+            ), None
+        
+        try:
+            data = json.loads(response.content)
+            key_steps = data.get("key_steps", solve_result.key_steps)
+            why_first = data.get("why_first_was_wrong", "")
+            why_second = data.get("why_second_was_wrong", "")
+            final_summary = data.get("final_summary", "Keep practicing!")
+            
+            explanation = f"**First attempt ({first_attempt}):** {why_first}\n\n"
+            if why_second:
+                explanation += f"**Second attempt ({second_attempt}):** {why_second}\n\n"
+            else:
+                explanation += f"**Second attempt ({second_attempt}):** Correct!\n\n"
+            explanation += f"**Solution:**\n" + "\n".join(key_steps)
+            explanation += f"\n\n**{final_summary}**"
+            
+            return DiagnoseResult(
+                question_id=question.id,
+                user_answer=second_attempt,
+                correct_answer=correct_answer,
+                is_correct=is_second_correct,
+                first_attempt=first_attempt,
+                first_attempt_wrong=first_attempt_wrong,
+                why_user_choice_is_tempting=f"First attempt was wrong: {first_attempt}",
+                likely_misconceptions=[why_first] if why_first else [],
+                how_to_get_correct=explanation,
+                option_analysis=[]
+            ), None
+        except Exception as e:
+            self._log(f"[Mode C] Parse error: {e}", "warning")
+            return DiagnoseResult(
+                question_id=question.id,
+                user_answer=second_attempt,
+                correct_answer=correct_answer,
+                is_correct=is_second_correct,
+                first_attempt=first_attempt,
+                first_attempt_wrong=first_attempt_wrong,
+                why_user_choice_is_tempting=f"First attempt was wrong: {first_attempt}",
+                likely_misconceptions=[],
+                how_to_get_correct=f"The correct answer is {correct_answer}.\n\n{solve_steps}",
+                option_analysis=[]
+            ), None

@@ -154,6 +154,8 @@ def create_session_output(
     answered_questions = len(user_answers) if user_answers else 0
     correct_count = 0
     incorrect_ids = []
+    first_attempt_wrong_count = 0
+    first_attempt_wrong_ids = []
     
     if diagnose_results:
         for dr in diagnose_results:
@@ -161,6 +163,11 @@ def create_session_output(
                 correct_count += 1
             else:
                 incorrect_ids.append(dr.question_id)
+            
+            # Track first attempt wrong (Mode C scaffolded tutoring)
+            if dr.first_attempt_wrong:
+                first_attempt_wrong_count += 1
+                first_attempt_wrong_ids.append(dr.question_id)
     
     return SessionResult(
         session_id=session_id,
@@ -178,5 +185,7 @@ def create_session_output(
         total_questions=total_questions,
         answered_questions=answered_questions,
         correct_count=correct_count,
-        incorrect_ids=incorrect_ids
+        incorrect_ids=incorrect_ids,
+        first_attempt_wrong_count=first_attempt_wrong_count,
+        first_attempt_wrong_ids=first_attempt_wrong_ids
     )
