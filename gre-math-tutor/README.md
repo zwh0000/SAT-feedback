@@ -9,7 +9,10 @@ An end-to-end problem processing system that supports PDF question extraction, a
   - Math: Use GPT Vision to extract structured questions from images
   - English: Use OCR + Text LLM to extract questions from text
 - **Intelligent Solving (Stage S)**: Automatically solve questions with key steps
-- **Error Diagnosis (Stage D)**: Compare user answers, analyze errors, and provide corrective guidance
+- **Error Diagnosis (Stage D)**: Three powerful diagnosis modes
+  - **Mode A**: Direct solution with complete steps
+  - **Mode B**: Contrastive analysis of errors vs correct approach (default)
+  - **Mode C**: Scaffolded tutoring with hints and cognitive anchors
 - **Student Simulation**: Let AI simulate a student answering questions with realistic mistakes
 
 ## System Requirements
@@ -114,7 +117,167 @@ After running, the system will:
 2. Extract questions (Vision for Math, OCR for English)
 3. Solve questions (or use your correct answers file)
 4. Ask you to input answers (interactive, file, or simulate student)
-5. Diagnose errors and generate report
+5. **Select diagnosis mode** (A/B/C - see below)
+6. Diagnose errors and generate report
+
+## Diagnosis Modes
+
+The system offers **three diagnosis modes** to suit different learning needs. You can select your preferred mode during the diagnosis stage (after answering questions).
+
+### Mode A: Direct Solution
+**Best for:** Quick review, time-limited sessions, getting the answer immediately
+
+**What you get:**
+- ✓ Correct answer revealed directly
+- ✓ Complete step-by-step solution
+- ✓ One-sentence summary of key insight
+
+**Example output:**
+```
+Correct Answer: C
+
+Key Steps:
+1. Identify the given ratio x:y = 3:2
+2. Set up equation: x = 1.5y
+3. Substitute into total constraint
+4. Solve for y, then calculate x
+
+Summary: This is a proportion problem - understanding the ratio relationship is key.
+```
+
+---
+
+### Mode B: Contrastive Explanation - **Default**
+**Best for:** Understanding common mistakes, learning from errors
+
+**What you get:**
+- ✓ Analysis of why your wrong answer seems tempting
+- ✓ Explanation of what went wrong
+- ✓ Comparison with the correct solution
+- ✓ Option-by-option analysis (for multiple choice)
+
+**Example output:**
+```
+Your Answer: B | Correct Answer: C
+
+Why B is Tempting:
+Option B appears correct if you only consider the first paragraph...
+
+Likely Misconceptions:
+1. Confusing correlation with causation
+2. Overlooking the key qualifier in paragraph 2
+
+How to Get Correct:
+First, note that the author states... Then, compare this with...
+```
+
+---
+
+### Mode C: Scaffolded Tutoring - **Interactive Learning**
+**Best for:** Deep learning, building problem-solving skills, understanding concepts
+
+**What you get - Two-stage process:**
+
+**Stage 1: Hints (without revealing answer)**
+- ✗ Correct answer is NOT revealed
+- ✓ Error analysis: what went wrong
+- ✓ **Actionable hints with cognitive anchors:**
+  - Specific action to take
+  - Where to find evidence
+  - Guiding question
+  - **Expected conclusion** (what you should understand)
+- ✓ Second chance to answer
+
+**Example hint output:**
+```
+Your first answer: B (incorrect)
+
+Error Analysis:
+You may have missed the relationship between forced voting and true preferences.
+
+Next Steps to Try:
+
+  Step 1: Re-read where Singh and Roy discuss forced voting
+    Where to look: Text 2, paragraph discussing their research findings
+    Think: What did Singh and Roy find about people who feel forced to vote?
+    What you should understand: Based on their findings, decide whether 
+    mandatory voting strengthens or weakens the link between votes and 
+    voters' true preferences. You should understand the RELATIONSHIP 
+    between forced voting and genuine preference expression.
+
+  Step 2: Compare this finding with Fowler's argument
+    Where to look: Text 1, where Fowler discusses election results
+    Think: Do Singh and Roy agree or disagree with Fowler?
+    What you should understand: You should identify the CONTRASTING 
+    VIEWPOINT - one author sees a benefit, the other sees a drawback.
+
+Try again with these hints!
+```
+
+**Stage 2: Complete Analysis (after second attempt)**
+- ✓ Full solution with both attempts analyzed
+- ✓ Explanation of first mistake
+- ✓ Explanation of second attempt (if still wrong)
+- ✓ Encouragement based on improvement
+
+**Example final output:**
+```
+First Attempt (wrong): B
+Second Attempt: C (correct!)
+
+First attempt (B): You focused on the number of voters but missed the 
+quality of their decision-making. Singh and Roy's key finding is about...
+
+Second attempt (C): Correct! You successfully identified that mandatory 
+voting increases quantity but may decrease quality of voter decisions.
+
+Great improvement! You learned to look beyond surface-level information 
+and consider the deeper implications of research findings.
+```
+
+---
+
+### How to Select Mode
+
+When you run the diagnosis command:
+
+```bash
+python -m gre_tutor.run --pdf input.pdf --mode diagnose
+```
+
+After entering your answers, you'll see:
+
+```
+════════════════════════════════════════════════════
+Diagnosis Mode Selection
+════════════════════════════════════════════════════
+
+Condition A: Direct Solution
+  - Show correct answer directly
+  - Complete step-by-step solution
+  - One-sentence summary
+  Best for: Quick review, time-limited sessions
+
+Condition B: Contrastive Explanation (Current Default)
+  - Analyze why the wrong answer seems tempting
+  - Explain what went wrong
+  - Show correct solution with comparison
+  Best for: Understanding common mistakes
+
+Condition C: Scaffolded Tutoring
+  - First give hints (without revealing answer)
+  - Student gets a second chance to answer
+  - Then reveal full solution and analysis
+  Best for: Deep learning, building problem-solving skills
+
+Please choose diagnosis mode [A/B/C]: _
+```
+
+**Key Features of Mode C (Scaffolded Tutoring):**
+- **Cognitive Anchors**: Each hint includes an "expected conclusion" to help you understand the concept, not just follow steps
+- **For Math**: Learn *why* the formula works, not just how to apply it
+- **For English**: Understand the *relationship* between ideas, not just locate text
+- **Tracks Progress**: Even if you get it right on the second try, the system remembers you were wrong initially for learning analytics
 
 ## Project Structure
 
@@ -314,6 +477,43 @@ outputs/
     simulated_student_answers_details.json # (detailed simulation output)
 ```
 
+### Report Contents
+
+The `report.md` file includes different sections based on the diagnosis mode used:
+
+**All Modes:**
+- Summary statistics (answered questions, correct count, accuracy)
+- Question details with stems and options
+- Solution steps
+
+**Mode A (Direct Solution):**
+- Correct answer
+- Complete solution steps
+- One-sentence summary
+
+**Mode B (Contrastive Explanation) - Default:**
+- Why the wrong answer is tempting
+- Likely misconceptions
+- How to get the correct answer
+- Option-by-option analysis
+
+**Mode C (Scaffolded Tutoring):**
+- **First attempt** (marked as wrong even if second was correct)
+- Second attempt
+- Note if student improved
+- Analysis of both attempts
+- Complete solution with encouragement
+
+**Mode C Statistics Section:**
+```markdown
+### Scaffolded Tutoring (Mode C) Statistics
+- **First Attempt Wrong**: 5 questions
+- **Questions**: p1_q1, p1_q3, p2_q2, p2_q4, p3_q1
+- **Recovered on 2nd Attempt**: 3 questions
+```
+
+This helps track learning progress - even if a student gets it right on the second try, the initial mistake is recorded for analytics.
+
 ## Environment Variables
 
 ### Main API Configuration
@@ -398,3 +598,25 @@ STUDENT_CORRECT_RATE=70
   }
 }
 ```
+
+## Tips for Choosing Diagnosis Mode
+
+### When to Use Mode A (Direct Solution)
+✓ You need to check answers quickly  
+✓ You're doing a timed practice session  
+✓ You already understand the concepts but made a careless mistake  
+✓ You want to see the solution method immediately  
+
+### When to Use Mode B (Contrastive Explanation) - Default
+✓ You want to understand why you made the mistake  
+✓ You're learning from patterns of errors  
+✓ You need detailed comparison between options  
+✓ You're reviewing after a practice test  
+
+### When to Use Mode C (Scaffolded Tutoring)
+✓ You're learning a new concept  
+✓ You have time for deep practice  
+✓ You want to build problem-solving skills  
+✓ You want to **understand the "why" behind the answer**, not just the steps  
+✓ You prefer guided discovery over direct instruction  
+
