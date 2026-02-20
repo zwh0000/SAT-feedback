@@ -765,13 +765,13 @@ class ErrorDiagnoser:
         second_attempt: str
     ) -> tuple[Optional[DiagnoseResult], Optional[str]]:
         """
-        Mode C Step 2: Full diagnosis after second attempt.
+        Mode C Step 2: Full diagnosis after guided retries.
         
         Args:
             question: Question object.
             solve_result: Result from the solver.
             first_attempt: User's first wrong answer.
-            second_attempt: User's second attempt.
+            second_attempt: User's final attempt after hints.
         
         Returns:
             (DiagnoseResult, Error message or None)
@@ -781,7 +781,7 @@ class ErrorDiagnoser:
         
         is_second_correct = self._check_answer_correct(second_attempt, correct_answer, problem_type)
         
-        self._log(f"[Mode C] Final diagnosis for question {question.id}. First: {first_attempt}, Second: {second_attempt}, Correct: {correct_answer}")
+        self._log(f"[Mode C] Final diagnosis for question {question.id}. First: {first_attempt}, Final: {second_attempt}, Correct: {correct_answer}")
         
         solve_steps = "\n".join([f"{i+1}. {step}" for i, step in enumerate(solve_result.key_steps)])
         choices = question.choices
@@ -822,7 +822,7 @@ class ErrorDiagnoser:
                 first_attempt_wrong=first_attempt_wrong,
                 why_user_choice_is_tempting=f"First attempt was wrong: {first_attempt}",
                 likely_misconceptions=["Review the solution steps carefully"],
-                how_to_get_correct=f"The correct answer is {correct_answer}.\n\n{solve_steps}\n\nYou {improvement} on the second try!",
+                how_to_get_correct=f"The correct answer is {correct_answer}.\n\n{solve_steps}\n\nYou {improvement} after guided retries.",
                 option_analysis=[]
             ), None
         
@@ -835,9 +835,9 @@ class ErrorDiagnoser:
             
             explanation = f"**First attempt ({first_attempt}):** {why_first}\n\n"
             if why_second:
-                explanation += f"**Second attempt ({second_attempt}):** {why_second}\n\n"
+                explanation += f"**Final attempt ({second_attempt}):** {why_second}\n\n"
             else:
-                explanation += f"**Second attempt ({second_attempt}):** Correct!\n\n"
+                explanation += f"**Final attempt ({second_attempt}):** Correct!\n\n"
             explanation += f"**Solution:**\n" + "\n".join(key_steps)
             explanation += f"\n\n**{final_summary}**"
             

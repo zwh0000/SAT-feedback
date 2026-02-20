@@ -518,15 +518,16 @@ def collect_second_attempt(
     hint_result: dict
 ) -> str:
     """
-    For Condition C: Collect student's second attempt after showing hints
+    For Condition C: Collect student's next attempt after showing hints.
+    Can be called repeatedly in multi-round scaffolded tutoring.
     
     Args:
         question: The question
-        first_answer: Student's first answer
+        first_answer: Student's previous answer
         hint_result: The hint/error analysis from LLM
     
     Returns:
-        Student's second attempt answer
+        Student's next attempt answer
     """
     from rich.console import Console
     from rich.prompt import Prompt
@@ -535,7 +536,7 @@ def collect_second_attempt(
     console = Console(width=100)
     
     console.print("\n" + "="*70, style="yellow")
-    console.print("Second Chance - Try Again!", style="bold yellow")
+    console.print("Try Again With Hints", style="bold yellow")
     console.print("="*70, style="yellow")
     
     # Show the question again
@@ -554,7 +555,7 @@ def collect_second_attempt(
     # Show error analysis
     console.print()
     console.print(Panel(
-        f"[bold red]Your first answer:[/bold red] {first_answer}\n\n" +
+        f"[bold red]Your previous answer:[/bold red] {first_answer}\n\n" +
         f"[bold]Error Analysis:[/bold]\n{hint_result.get('error_analysis', 'N/A')}\n\n" +
         f"[bold]Key Concept:[/bold]\n{hint_result.get('key_concept_reminder', 'N/A')}",
         title="[bold yellow]Feedback[/bold yellow]",
@@ -602,7 +603,7 @@ def collect_second_attempt(
         answer = answer.strip()
         
         if answer == '':
-            console.print("[dim]Keeping first answer[/dim]")
+            console.print("[dim]Keeping previous answer[/dim]")
             return first_answer
         
         if is_numeric:

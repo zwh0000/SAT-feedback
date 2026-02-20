@@ -122,9 +122,9 @@ def generate_report_md(result: SessionResult) -> str:
             # Check if this was a Mode C scaffolded tutoring session
             if diagnose.first_attempt and diagnose.first_attempt_wrong:
                 lines.append(f"**First Attempt (wrong)**: {diagnose.first_attempt}")
-                lines.append(f"**Second Attempt**: {diagnose.user_answer} | **Correct Answer**: {diagnose.correct_answer}")
+                lines.append(f"**Final Attempt**: {diagnose.user_answer} | **Correct Answer**: {diagnose.correct_answer}")
                 if diagnose.is_correct:
-                    lines.append("*Note: Student got it right on second attempt after hints*")
+                    lines.append("*Note: Student got it right after guided retries with hints*")
             else:
                 lines.append(f"**User Answer**: {diagnose.user_answer} | **Correct Answer**: {diagnose.correct_answer}")
             lines.append("")

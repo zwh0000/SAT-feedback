@@ -467,6 +467,7 @@ class GREMathPipeline:
             
             # Wrong answer - start scaffolded tutoring
             console.print(f"\n[yellow]Question {question.id}: Not quite right. Let's work through this...[/yellow]")
+
             
             # Step 1: Get hints
             self.logger.info(f"[Mode C] Getting hints for {question.id}")
@@ -476,20 +477,49 @@ class GREMathPipeline:
                 user_answer=first_answer
             )
             
-            # Step 2: Collect second attempt
-            second_answer = collect_second_attempt(
-                question=question,
-                first_answer=first_answer,
-                hint_result=hint_result
-            )
+            # Step 2: Keep retrying until correct.
+            # Reuse the original actionable hints, but refresh error analysis
+            # for each new wrong answer.
+            current_answer = first_answer
+            final_answer = first_answer
+            while True:
+                next_answer = collect_second_attempt(
+                    question=question,
+                    first_answer=current_answer,
+                    hint_result=hint_result
+                )
+                
+                final_answer = next_answer
+                is_correct_now = diagnoser._check_answer_correct(
+                    final_answer, correct_answer, question.problem_type
+                )
+                
+                if is_correct_now:
+                    break
+                
+                # Refresh only error analysis based on the latest wrong answer.
+                # Keep actionable hints unchanged (as requested).
+                refreshed_hint = diagnoser.get_hint_for_wrong_answer(
+                    question=question,
+                    solve_result=solve_result,
+                    user_answer=final_answer
+                )
+                if refreshed_hint:
+                    hint_result["error_analysis"] = refreshed_hint.get(
+                        "error_analysis",
+                        hint_result.get("error_analysis", "")
+                    )
+                
+                current_answer = final_answer
+                console.print("\n[yellow]Still not correct. Review the same hints and try again.[/yellow]")
             
-            # Step 3: Final diagnosis
+            # Step 3: Final diagnosis (called once, after student gets correct)
             self.logger.info(f"[Mode C] Final diagnosis for {question.id}")
             result, error = diagnoser.diagnose_after_second_attempt(
                 question=question,
                 solve_result=solve_result,
                 first_attempt=first_answer,
-                second_attempt=second_answer
+                second_attempt=final_answer
             )
             
             if result:
