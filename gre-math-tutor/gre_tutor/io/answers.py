@@ -7,9 +7,15 @@ Supports multiple choice (A-E) and numeric entry (number/fraction/expression)
 import json
 import os
 import textwrap
-from typing import Optional
+from typing import Optional, Any
 
 from ..core.models import Question
+from ..core.validators import extract_json_from_text
+from ..llm.prompts import (
+    HANDWRITTEN_MATH_WORK_SYSTEM_PROMPT,
+    HANDWRITTEN_MATH_WORK_USER_PROMPT_TEMPLATE,
+    HANDWRITTEN_MATH_WORK_SCHEMA_HINT,
+)
 
 
 def load_answers_from_json(json_path: str) -> dict[str, str]:
@@ -202,7 +208,7 @@ def ask_user_answers_choice(
     solve_results=None,
     session_dir: str = None,
     subject: str = "math"
-) -> dict[str, str]:
+) -> tuple[dict[str, str], dict[str, dict[str, Any]]]:
     """
     Ask user to choose answer input method
     
@@ -214,7 +220,7 @@ def ask_user_answers_choice(
         subject: "math" or "english" - determines which prompts to use for simulation
     
     Returns:
-        User answers dict
+        (user answers dict, student handwritten work dict)
     """
     from rich.console import Console
     from rich.prompt import Prompt
@@ -246,9 +252,13 @@ You can choose:
     )
     
     if choice == "1":
-        return collect_answers_interactive(questions)
+        return collect_answers_interactive(
+            questions,
+            llm_client=llm_client,
+            subject=subject
+        )
     elif choice == "2":
-        return collect_answers_from_file(questions)
+        return collect_answers_from_file(questions), {}
     elif choice == "3" and has_simulator:
         from .student_simulator import ask_simulate_student
         simulated_answers = ask_simulate_student(
@@ -259,12 +269,20 @@ You can choose:
             subject=subject
         )
         if simulated_answers:
-            return simulated_answers
+            return simulated_answers, {}
         else:
             console.print("[yellow]Falling back to interactive input...[/yellow]")
-            return collect_answers_interactive(questions)
+            return collect_answers_interactive(
+                questions,
+                llm_client=llm_client,
+                subject=subject
+            )
     else:
-        return collect_answers_interactive(questions)
+        return collect_answers_interactive(
+            questions,
+            llm_client=llm_client,
+            subject=subject
+        )
 
 
 def collect_answers_from_file(questions: list[Question]) -> dict[str, str]:
@@ -317,7 +335,66 @@ def collect_answers_from_file(questions: list[Question]) -> dict[str, str]:
             continue
 
 
-def collect_answers_interactive(questions: list[Question]) -> dict[str, str]:
+def _transcribe_handwritten_work_image(
+    llm_client,
+    image_path: str,
+    question_id: str
+) -> dict[str, Any]:
+    """
+    Transcribe student's handwritten math work from an image using vision LLM.
+    Returns a structured dict and never raises (stores errors in result).
+    """
+    result: dict[str, Any] = {
+        "image_path": image_path,
+        "transcribed_work": "",
+        "step_lines": [],
+        "unclear_parts": [],
+        "confidence": 0.0,
+        "error": None
+    }
+    
+    if llm_client is None:
+        result["error"] = "LLM client unavailable"
+        return result
+    
+    if not os.path.exists(image_path):
+        result["error"] = f"Image file not found: {image_path}"
+        return result
+    
+    try:
+        response = llm_client.generate_json(
+            system_prompt=HANDWRITTEN_MATH_WORK_SYSTEM_PROMPT,
+            user_prompt=HANDWRITTEN_MATH_WORK_USER_PROMPT_TEMPLATE.format(question_id=question_id),
+            schema_hint=HANDWRITTEN_MATH_WORK_SCHEMA_HINT,
+            images=[image_path],
+            temperature=0.0
+        )
+        if not response.success:
+            result["error"] = response.error or "Vision transcription failed"
+            return result
+        
+        content = response.content or ""
+        extracted = extract_json_from_text(content) or content
+        data = json.loads(extracted)
+        
+        result["transcribed_work"] = str(data.get("transcribed_work", "")).strip()
+        result["step_lines"] = [str(x) for x in data.get("step_lines", []) if str(x).strip()]
+        result["unclear_parts"] = [str(x) for x in data.get("unclear_parts", []) if str(x).strip()]
+        try:
+            result["confidence"] = float(data.get("confidence", 0.0))
+        except Exception:
+            result["confidence"] = 0.0
+        return result
+    except Exception as e:
+        result["error"] = f"Handwritten work transcription parse failed: {e}"
+        return result
+
+
+def collect_answers_interactive(
+    questions: list[Question],
+    llm_client=None,
+    subject: str = "math"
+) -> tuple[dict[str, str], dict[str, dict[str, Any]]]:
     """
     Interactive collect user answers
     Supports multiple choice (A-E) and numeric entry (number/fraction/expression)
@@ -326,7 +403,7 @@ def collect_answers_interactive(questions: list[Question]) -> dict[str, str]:
         questions: Question list
     
     Returns:
-        Answer dict {question_id: answer}
+        (answers dict, handwritten work dict)
     """
     from rich.console import Console
     from rich.panel import Panel
@@ -336,6 +413,7 @@ def collect_answers_interactive(questions: list[Question]) -> dict[str, str]:
     
     console = Console(width=100)
     answers = {}
+    handwritten_work = {}
     
     console.print("\n" + "="*70, style="blue")
     console.print("Interactive Answer Input", style="bold blue")
@@ -403,7 +481,7 @@ def collect_answers_interactive(questions: list[Question]) -> dict[str, str]:
             
             if answer.upper() == 'Q':
                 console.print("\n[yellow]Exited answering[/yellow]")
-                return answers
+                return answers, handwritten_work
             
             if answer == '':
                 console.print("[dim]Skipped[/dim]")
@@ -421,6 +499,40 @@ def collect_answers_interactive(questions: list[Question]) -> dict[str, str]:
                     break
                 else:
                     console.print("[red]Please enter one of A-E[/red]")
+
+        # Optional handwritten work image upload (math interactive mode only)
+        if (
+            question.id in answers
+            and subject == "math"
+            and llm_client is not None
+        ):
+            console.print()
+            upload_choice = Prompt.ask(
+                "[cyan]Handwritten work image[/cyan] [dim](1=skip, 2=upload and transcribe)[/dim]",
+                choices=["1", "2"],
+                default="1"
+            )
+            if upload_choice == "2":
+                image_path = Prompt.ask(
+                    "[cyan]Enter handwritten work image path[/cyan]",
+                    default="",
+                    show_default=False
+                ).strip()
+                if image_path:
+                    work_info = _transcribe_handwritten_work_image(
+                        llm_client=llm_client,
+                        image_path=image_path,
+                        question_id=question.id
+                    )
+                    handwritten_work[question.id] = work_info
+                    if work_info.get("error"):
+                        console.print(f"[yellow]Handwritten work transcription failed:[/yellow] {work_info['error']}")
+                    else:
+                        preview = work_info.get("transcribed_work", "") or "No transcription returned"
+                        if len(preview) > 180:
+                            preview = preview[:177] + "..."
+                        console.print("[green]Handwritten work transcribed and saved.[/green]")
+                        console.print(f"[dim]{preview}[/dim]")
     
     console.print("\n" + "="*70, style="blue")
     console.print(f"Answering complete!", style="bold green")
@@ -431,7 +543,7 @@ def collect_answers_interactive(questions: list[Question]) -> dict[str, str]:
     console.print(f"   Total answered {len(answers)} questions (Multiple choice: {choice_count}, Numeric entry: {numeric_count})")
     console.print("="*70 + "\n", style="blue")
     
-    return answers
+    return answers, handwritten_work
 
 
 def merge_answers(

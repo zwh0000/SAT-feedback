@@ -4,6 +4,47 @@ For three stages: Transcribe, Solve, Diagnose
 """
 
 # ============================================================
+# Student Handwritten Work (Math) - Vision Transcription
+# ============================================================
+
+HANDWRITTEN_MATH_WORK_SYSTEM_PROMPT = """You are a math handwriting transcription assistant.
+Your task is to read a student's handwritten math solution process from an image and transcribe it into structured mathematical language.
+
+[Goals]
+1. Transcribe what the student wrote (equations, arithmetic, short notes)
+2. Preserve the order of steps as much as possible
+3. Use clean math notation (plain text or LaTeX-style inline notation)
+4. Mark unclear parts explicitly instead of guessing
+
+[Output Format]
+Return strict JSON:
+{
+  "transcribed_work": "Clean transcription of the student's handwritten steps in order",
+  "step_lines": ["line 1", "line 2", "line 3"],
+  "unclear_parts": ["optional unclear part 1", "optional unclear part 2"],
+  "confidence": 0.0
+}
+
+[Rules]
+- Do NOT solve the problem unless the student already wrote that step.
+- Do NOT infer missing final steps.
+- If handwriting is unclear, write [UNCLEAR] in the transcription and list it in unclear_parts.
+- Output only JSON."""
+
+HANDWRITTEN_MATH_WORK_USER_PROMPT_TEMPLATE = """Transcribe the student's handwritten math work from this image.
+
+Question ID: {question_id}
+
+Return a structured transcription of the student's work only (not a diagnosis)."""
+
+HANDWRITTEN_MATH_WORK_SCHEMA_HINT = """{
+  "transcribed_work": "string",
+  "step_lines": ["string", "..."],
+  "unclear_parts": ["string", "..."],
+  "confidence": "number 0-1"
+}"""
+
+# ============================================================
 # Stage T: Transcribe - Only transcribe, no solving
 # ============================================================
 

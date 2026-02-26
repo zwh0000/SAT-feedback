@@ -147,6 +147,7 @@ class ErrorDiagnoser:
         question: Question,
         solve_result: SolveResult,
         user_answer: str,
+        student_work_text: Optional[str] = None,
         retry_on_failure: bool = True
     ) -> tuple[Optional[DiagnoseResult], Optional[str]]:
         """
@@ -223,13 +224,13 @@ class ErrorDiagnoser:
             # Numeric entry diagnosis
             return self._diagnose_numeric_entry(
                 question, solve_result, user_answer, correct_answer, 
-                solve_steps, retry_on_failure
+                solve_steps, student_work_text, retry_on_failure
             )
         else:
             # Multiple choice diagnosis
             return self._diagnose_multiple_choice(
                 question, solve_result, user_answer.upper(), correct_answer.upper(),
-                solve_steps, retry_on_failure
+                solve_steps, student_work_text, retry_on_failure
             )
     
     def _diagnose_multiple_choice(
@@ -239,6 +240,7 @@ class ErrorDiagnoser:
         user_answer: str,
         correct_answer: str,
         solve_steps: str,
+        student_work_text: Optional[str],
         retry_on_failure: bool
     ) -> tuple[Optional[DiagnoseResult], Optional[str]]:
         """Diagnoses Multiple Choice errors."""
@@ -264,6 +266,8 @@ class ErrorDiagnoser:
             correct_answer=correct_answer,
             solve_steps=solve_steps
         )
+        if student_work_text:
+            user_prompt += f"\n\nStudent Handwritten Work (LLM-transcribed):\n{student_work_text}"
         
         # Call LLM
         response = self.llm.generate_json(
@@ -324,6 +328,7 @@ class ErrorDiagnoser:
         user_answer: str,
         correct_answer: str,
         solve_steps: str,
+        student_work_text: Optional[str],
         retry_on_failure: bool
     ) -> tuple[Optional[DiagnoseResult], Optional[str]]:
         """Diagnoses Numeric Entry errors."""
@@ -336,6 +341,8 @@ class ErrorDiagnoser:
             correct_answer=correct_answer,
             solve_steps=solve_steps
         )
+        if student_work_text:
+            user_prompt += f"\n\nStudent Handwritten Work (LLM-transcribed):\n{student_work_text}"
         
         # Call LLM
         response = self.llm.generate_json(
@@ -470,7 +477,8 @@ class ErrorDiagnoser:
         questions: list[Question],
         solve_results: list[SolveResult],
         user_answers: dict[str, str],
-        mode: DiagnoseMode = "B"
+        mode: DiagnoseMode = "B",
+        student_work_map: Optional[dict[str, dict]] = None
     ) -> tuple[list[DiagnoseResult], list[str]]:
         """
         Batch diagnosis.
@@ -504,18 +512,30 @@ class ErrorDiagnoser:
                 continue
             
             # Mode A: Direct Solution (no contrastive analysis)
+            work_info = (student_work_map or {}).get(question.id, {})
+            student_work_text = work_info.get("transcribed_work") or None
+
             if mode == "A":
                 result, error = self.diagnose_mode_a(question, solve_result, user_answer)
             # Mode C: Scaffolded (handled separately in pipeline)
             elif mode == "C":
                 # For batch, we just do regular diagnosis
                 # Scaffolded mode requires interactive handling
-                result, error = self.diagnose(question, solve_result, user_answer)
+                result, error = self.diagnose(
+                    question, solve_result, user_answer,
+                    student_work_text=student_work_text
+                )
             # Mode B: Contrastive (default, current behavior)
             else:
-                result, error = self.diagnose(question, solve_result, user_answer)
+                result, error = self.diagnose(
+                    question, solve_result, user_answer,
+                    student_work_text=student_work_text
+                )
             
             if result:
+                if work_info:
+                    result.student_work_image_path = work_info.get("image_path")
+                    result.student_work_transcription = work_info.get("transcribed_work")
                 results.append(result)
             if error:
                 errors.append(error)
@@ -636,7 +656,8 @@ class ErrorDiagnoser:
         self,
         question: Question,
         solve_result: SolveResult,
-        user_answer: str
+        user_answer: str,
+        student_work_text: Optional[str] = None
     ) -> dict:
         """
         Mode C Step 1: Generate hints without revealing the answer.
@@ -667,6 +688,8 @@ class ErrorDiagnoser:
             user_answer=user_answer,
             correct_answer=correct_answer
         )
+        if student_work_text:
+            user_prompt += f"\n\nStudent Handwritten Work (LLM-transcribed):\n{student_work_text}"
         
         response = self.llm.generate_json(
             system_prompt=get_mode_c_hint_system_prompt(self.subject),
@@ -762,7 +785,8 @@ class ErrorDiagnoser:
         question: Question,
         solve_result: SolveResult,
         first_attempt: str,
-        second_attempt: str
+        second_attempt: str,
+        student_work_text: Optional[str] = None
     ) -> tuple[Optional[DiagnoseResult], Optional[str]]:
         """
         Mode C Step 2: Full diagnosis after guided retries.
@@ -799,6 +823,8 @@ class ErrorDiagnoser:
             correct_answer=correct_answer,
             solve_steps=solve_steps
         )
+        if student_work_text:
+            user_prompt += f"\n\nStudent Handwritten Work (LLM-transcribed):\n{student_work_text}"
         
         response = self.llm.generate_json(
             system_prompt=get_mode_c_final_system_prompt(self.subject),

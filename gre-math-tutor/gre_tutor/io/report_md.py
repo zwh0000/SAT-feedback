@@ -132,6 +132,15 @@ def generate_report_md(result: SessionResult) -> str:
             lines.append(f"**Correct Answer**: {solve.correct_answer}")
             lines.append("")
         
+        if diagnose and (diagnose.student_work_image_path or diagnose.student_work_transcription):
+            lines.append("**Student Handwritten Work (Uploaded)**:")
+            if diagnose.student_work_image_path:
+                lines.append(f"- Image: {diagnose.student_work_image_path}")
+            if diagnose.student_work_transcription:
+                lines.append("- Transcription:")
+                lines.append(diagnose.student_work_transcription)
+            lines.append("")
+        
         # Solution steps
         if solve:
             lines.append("**Key Steps**:")

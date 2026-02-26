@@ -335,6 +335,8 @@ class GREMathPipeline:
         # ===== Collect User Answers =====
         self.logger.info("Collecting user answers")
         
+        student_work_map: dict[str, dict] = {}
+        
         if answers_json:
             try:
                 user_answers = load_answers_from_json(answers_json)
@@ -343,7 +345,7 @@ class GREMathPipeline:
                 self.logger.error(f"Failed to load user answers file: {e}")
                 user_answers = {}
         elif interactive:
-            user_answers = ask_user_answers_choice(
+            user_answers, student_work_map = ask_user_answers_choice(
                 questions, 
                 llm_client=self.llm,
                 solve_results=solve_results,
@@ -352,6 +354,11 @@ class GREMathPipeline:
             )
         else:
             user_answers = {}
+        
+        if student_work_map:
+            work_path = os.path.join(self.session_dir, "student_work_transcriptions.json")
+            save_json(student_work_map, work_path)
+            self.logger.info(f"Saved handwritten work transcriptions: {work_path}")
         
         # ===== Select Diagnosis Mode =====
         diagnose_mode = "B"  # Default: Contrastive
@@ -370,14 +377,16 @@ class GREMathPipeline:
                 diagnoser=diagnoser,
                 questions=questions,
                 solve_results=solve_results,
-                user_answers=user_answers
+                user_answers=user_answers,
+                student_work_map=student_work_map
             )
         else:
             diagnose_results, diagnose_errors = diagnoser.diagnose_batch(
                 questions=questions,
                 solve_results=solve_results,
                 user_answers=user_answers,
-                mode=diagnose_mode
+                mode=diagnose_mode,
+                student_work_map=student_work_map
             )
         
         self.logger.info(f"Completed diagnosis for {len(diagnose_results)} questions")
@@ -403,7 +412,8 @@ class GREMathPipeline:
         diagnoser: ErrorDiagnoser,
         questions: list[Question],
         solve_results: list[SolveResult],
-        user_answers: dict[str, str]
+        user_answers: dict[str, str],
+        student_work_map: Optional[dict[str, dict]] = None
     ) -> tuple[list[DiagnoseResult], list[str]]:
         """
         Mode C: Scaffolded Tutoring
@@ -440,6 +450,9 @@ class GREMathPipeline:
             if not first_answer:
                 continue
             
+            work_info = (student_work_map or {}).get(question.id, {})
+            student_work_text = work_info.get("transcribed_work") or None
+            
             solve_result = solve_map.get(question.id)
             if not solve_result:
                 errors.append(f"Missing solving result for question {question.id}")
@@ -458,6 +471,8 @@ class GREMathPipeline:
                     user_answer=first_answer,
                     correct_answer=correct_answer,
                     is_correct=True,
+                    student_work_image_path=work_info.get("image_path"),
+                    student_work_transcription=work_info.get("transcribed_work"),
                     why_user_choice_is_tempting=None,
                     likely_misconceptions=[],
                     how_to_get_correct=None,
@@ -474,7 +489,8 @@ class GREMathPipeline:
             hint_result = diagnoser.get_hint_for_wrong_answer(
                 question=question,
                 solve_result=solve_result,
-                user_answer=first_answer
+                user_answer=first_answer,
+                student_work_text=student_work_text
             )
             
             # Step 2: Keep retrying until correct.
@@ -502,7 +518,8 @@ class GREMathPipeline:
                 refreshed_hint = diagnoser.get_hint_for_wrong_answer(
                     question=question,
                     solve_result=solve_result,
-                    user_answer=final_answer
+                    user_answer=final_answer,
+                    student_work_text=student_work_text
                 )
                 if refreshed_hint:
                     hint_result["error_analysis"] = refreshed_hint.get(
@@ -519,10 +536,14 @@ class GREMathPipeline:
                 question=question,
                 solve_result=solve_result,
                 first_attempt=first_answer,
-                second_attempt=final_answer
+                second_attempt=final_answer,
+                student_work_text=student_work_text
             )
             
             if result:
+                if work_info:
+                    result.student_work_image_path = work_info.get("image_path")
+                    result.student_work_transcription = work_info.get("transcribed_work")
                 results.append(result)
                 
                 # Show final result

@@ -104,6 +104,14 @@ class DiagnoseResult(BaseModel):
         False,
         description="True if the first attempt was wrong (even if second attempt was correct)"
     )
+    student_work_image_path: Optional[str] = Field(
+        None,
+        description="Path to student's uploaded handwritten work image (if provided)"
+    )
+    student_work_transcription: Optional[str] = Field(
+        None,
+        description="LLM-transcribed student handwritten math work"
+    )
     
     # Diagnosis content (populated only when the answer is incorrect)
     why_user_choice_is_tempting: Optional[str] = Field(
