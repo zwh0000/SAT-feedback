@@ -130,7 +130,7 @@ class OpenAIClient(LLMClient):
                 model=model,
                 messages=messages,
                 temperature=temperature,
-                max_tokens=4096,
+                max_completion_tokens=4096,
                 response_format={"type": "json_object"} if not images else None
             )
             
@@ -171,7 +171,7 @@ class OpenAIClient(LLMClient):
                 model=self.text_model,
                 messages=messages,
                 temperature=temperature,
-                max_tokens=4096
+                max_completion_tokens=4096
             )
             
             content = response.choices[0].message.content
