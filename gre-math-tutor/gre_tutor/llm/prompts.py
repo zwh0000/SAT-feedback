@@ -243,6 +243,9 @@ You must output strict JSON format:
   "user_answer": "student answer",
   "correct_answer": "correct answer",
   "is_correct": false,
+  "step_audit": [
+    "Step 1: [student wrote X] -> My verification: [your calculation] -> Correct/Incorrect"
+  ],
   "why_user_choice_is_tempting": "Explain why student might choose this wrong option (must be specific to the problem)",
   "likely_misconceptions": [
     "possible misconception 1",
@@ -272,6 +275,10 @@ You must output strict JSON format:
 2. likely_misconceptions: At least 2 possible misconceptions
 3. how_to_get_correct: Use teaching language, step by step explanation
 4. option_analysis: At least analyze user's choice and correct option
+5. If student handwritten work is provided, add `step_audit` before `error_analysis`.
+6. In `step_audit`, use format:
+   "Step N: [student wrote X] -> My verification: [your calculation] -> Correct/Incorrect"
+7. `error_analysis` must be consistent with the FIRST incorrect step from `step_audit`.
 
 [Common SAT Math Misconception Categories]
 - Calculation errors: sign errors, operation order errors, decimal point errors
@@ -301,6 +308,10 @@ Correct Answer (correct_answer): {correct_answer}
 Correct Solution Reference:
 {solve_steps}
 
+If a section named "Student Handwritten Work (LLM-transcribed)" is provided below:
+1) first produce `step_audit`
+2) then base diagnosis on the first incorrect step from that audit
+
 Please analyze why student might have chosen wrong, provide error diagnosis and correction guidance. Output strict JSON format."""
 
 # -------------------- Numeric Entry Diagnosis --------------------
@@ -317,6 +328,9 @@ You must output strict JSON format:
   "user_answer": "student's filled answer",
   "correct_answer": "correct answer",
   "is_correct": false,
+  "step_audit": [
+    "Step 1: [student wrote X] -> My verification: [your calculation] -> Correct/Incorrect"
+  ],
   "why_user_answer_is_wrong": "Specifically analyze where student's answer went wrong (must compare student answer and correct answer, analyze possible calculation process)",
   "likely_misconceptions": [
     "possible misconception 1",
@@ -333,6 +347,10 @@ You must output strict JSON format:
 2. likely_misconceptions: At least 2 possible misconceptions
 3. how_to_get_correct: Use teaching language, step by step explanation
 4. error_type: Categorize error type
+5. If student handwritten work is provided, add `step_audit` before error analysis.
+6. In `step_audit`, use format:
+   "Step N: [student wrote X] -> My verification: [your calculation] -> Correct/Incorrect"
+7. `why_user_answer_is_wrong` must be consistent with the FIRST incorrect step from `step_audit`.
 
 [Common Numeric Entry Error Types]
 - calculation_error: arithmetic errors, decimal point errors, fraction simplification errors
@@ -354,6 +372,10 @@ Correct Answer (correct_answer): {correct_answer}
 
 Correct Solution Reference:
 {solve_steps}
+
+If a section named "Student Handwritten Work (LLM-transcribed)" is provided below:
+1) first produce `step_audit`
+2) then base diagnosis on the first incorrect step from that audit
 
 Please analyze where student's answer went wrong, infer possible error reasons, provide error diagnosis and correction guidance. Output strict JSON format."""
 
@@ -508,6 +530,9 @@ You must output strict JSON format:
 {
   "question_id": "question ID",
   "error_analysis": "What went wrong in the student's calculation or reasoning (specific to their wrong answer)",
+  "step_audit": [
+    "Step 1: [student wrote X] -> My verification: [your calculation] -> Correct/Incorrect"
+  ],
   "actionable_hints": [
     {
       "step_number": 1,
@@ -536,6 +561,10 @@ You must output strict JSON format:
 5. Expected conclusions should be COGNITIVE ANCHORS - help students understand the mathematical concept, not just follow steps
 6. Guide them through the solving process step by step
 7. 2-4 actionable hints
+8. If student handwritten work is provided, you MUST produce `step_audit` first.
+9. In `step_audit`, use format:
+   "Step N: [student wrote X] -> My verification: [your calculation] -> Correct/Incorrect"
+10. `error_analysis` must align with the FIRST incorrect step from `step_audit`.
 
 Examples of good actionable hints with cognitive anchors:
 
@@ -583,9 +612,12 @@ Student's Wrong Answer: {user_answer}
 
 Please provide:
 1. Error analysis - what went wrong
+1.5. Step audit - verify each handwritten step explicitly
 2. Actionable hints - specific steps with evidence locations
 3. Key concept reminder
 4. Encouragement to try again
+
+If handwritten work is provided, output `step_audit` first, then write `error_analysis`.
 
 Output strict JSON format."""
 
@@ -633,6 +665,9 @@ You must output strict JSON format:
   "second_attempt": "student's second answer",
   "correct_answer": "correct answer",
   "is_second_attempt_correct": true/false,
+  "step_audit": [
+    "Step 1: [student wrote X] -> My verification: [your calculation] -> Correct/Incorrect"
+  ],
   "why_second_was_wrong": "Analysis of second wrong answer (if applicable, null if correct)",
   "final_summary": "Key takeaway and encouragement"
 }
@@ -642,6 +677,7 @@ You must output strict JSON format:
 2. Analyze both attempts
 3. Give encouraging feedback based on improvement (if any)
 4. final_summary: End with encouragement and key learning point
+5. If handwritten work is provided, produce `step_audit` first and keep analysis consistent with it.
 
 Output only JSON, no explanatory text."""
 
@@ -664,6 +700,8 @@ Correct Answer: {correct_answer}
 
 Reference solution:
 {solve_steps}
+
+If handwritten work is provided, output `step_audit` first, then write analysis based on the first incorrect audited step.
 
 Please provide complete analysis and final explanation. Output strict JSON format."""
 
@@ -701,6 +739,7 @@ DIAGNOSE_SCHEMA_HINT = """{
   "user_answer": "string",
   "correct_answer": "string",
   "is_correct": "boolean",
+  "step_audit": ["Step 1: [student wrote X] -> My verification: [your calculation] -> Correct/Incorrect"],
   "why_user_choice_is_tempting": "string|null",
   "likely_misconceptions": ["string", "string"],  // at least 2
   "how_to_get_correct": "string|null",
@@ -712,6 +751,7 @@ DIAGNOSE_SCHEMA_HINT_NUMERIC = """{
   "user_answer": "string",
   "correct_answer": "string",
   "is_correct": "boolean",
+  "step_audit": ["Step 1: [student wrote X] -> My verification: [your calculation] -> Correct/Incorrect"],
   "why_user_answer_is_wrong": "string",
   "likely_misconceptions": ["string", "string"],  // at least 2
   "how_to_get_correct": "string",
