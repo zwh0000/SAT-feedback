@@ -50,7 +50,7 @@ def test_pdf_to_images():
     #         return None
     
     try:
-        from gre_tutor.ingest.pdf_to_images import pdf_to_images, get_pdf_page_count
+        from sat_tutor.ingest.pdf_to_images import pdf_to_images, get_pdf_page_count
         
         # 获取页数
         total_pages = get_pdf_page_count(pdf_path)
@@ -98,17 +98,17 @@ def test_vision_extract(image_paths=None, use_mock=False):
     
     try:
         if use_mock:
-            from gre_tutor.llm.mock_client import MockLLMClient
+            from sat_tutor.llm.mock_client import MockLLMClient
             client = MockLLMClient()
         else:
-            from gre_tutor.llm.openai_client import OpenAIClient
+            from sat_tutor.llm.openai_client import OpenAIClient
             client = OpenAIClient()
             if not client.is_available:
                 print("⚠️ OpenAI API Key 未配置，切换到 Mock 模式")
-                from gre_tutor.llm.mock_client import MockLLMClient
+                from sat_tutor.llm.mock_client import MockLLMClient
                 client = MockLLMClient()
         
-        from gre_tutor.ingest.vision_extract import VisionQuestionExtractor
+        from sat_tutor.ingest.vision_extract import VisionQuestionExtractor
         
         extractor = VisionQuestionExtractor(client)
         
@@ -149,7 +149,7 @@ def test_vision_extract(image_paths=None, use_mock=False):
         traceback.print_exc()
         return None
 
-from gre_tutor.core.models import Question
+from sat_tutor.core.models import Question
 def load_questions_from_json(path: str) -> list[Question]:
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -161,7 +161,7 @@ def load_questions_from_json(path: str) -> list[Question]:
     return questions
     
 
-from gre_tutor.core.models import SolveResult
+from sat_tutor.core.models import SolveResult
 
 def load_solve_results(path: str) -> list[SolveResult]:
     with open(path, "r", encoding="utf-8") as f:
@@ -174,7 +174,7 @@ def test_solver(questions=None, use_mock=True):
     
     # 如果没有题目，先创建测试题目
     if not questions:
-        from gre_tutor.core.models import Question, QuestionSource
+        from sat_tutor.core.models import Question, QuestionSource
         questions = [
             Question(
                 id="p1_q1",
@@ -196,17 +196,17 @@ def test_solver(questions=None, use_mock=True):
     
     try:
         if use_mock:
-            from gre_tutor.llm.mock_client import MockLLMClient
+            from sat_tutor.llm.mock_client import MockLLMClient
             client = MockLLMClient()
         else:
-            from gre_tutor.llm.openai_client import OpenAIClient
+            from sat_tutor.llm.openai_client import OpenAIClient
             client = OpenAIClient()
             if not client.is_available:
                 print("⚠️ OpenAI API Key 未配置，切换到 Mock 模式")
-                from gre_tutor.llm.mock_client import MockLLMClient
+                from sat_tutor.llm.mock_client import MockLLMClient
                 client = MockLLMClient()
         
-        from gre_tutor.core.solver import QuestionSolver
+        from sat_tutor.core.solver import QuestionSolver
         
         solver = QuestionSolver(client)
         
@@ -253,7 +253,7 @@ def test_diagnose(questions=None, solve_results=None, user_answers=None, use_moc
     
     # 准备测试数据
     if not questions:
-        from gre_tutor.core.models import Question, QuestionSource
+        from sat_tutor.core.models import Question, QuestionSource
         questions = [
             Question(
                 id="p1_q1",
@@ -270,7 +270,7 @@ def test_diagnose(questions=None, solve_results=None, user_answers=None, use_moc
         ]
     
     if not solve_results:
-        from gre_tutor.core.models import SolveResult
+        from sat_tutor.core.models import SolveResult
         solve_results = [
             SolveResult(
                 question_id="p1_q1",
@@ -302,17 +302,17 @@ def test_diagnose(questions=None, solve_results=None, user_answers=None, use_moc
     
     try:
         if use_mock:
-            from gre_tutor.llm.mock_client import MockLLMClient
+            from sat_tutor.llm.mock_client import MockLLMClient
             client = MockLLMClient()
         else:
-            from gre_tutor.llm.openai_client import OpenAIClient
+            from sat_tutor.llm.openai_client import OpenAIClient
             client = OpenAIClient()
             if not client.is_available:
                 print("⚠️ OpenAI API Key 未配置，切换到 Mock 模式")
-                from gre_tutor.llm.mock_client import MockLLMClient
+                from sat_tutor.llm.mock_client import MockLLMClient
                 client = MockLLMClient()
         
-        from gre_tutor.core.diagnose import ErrorDiagnoser
+        from sat_tutor.core.diagnose import ErrorDiagnoser
         
         diagnoser = ErrorDiagnoser(client)
         
@@ -381,7 +381,7 @@ def test_full_pipeline(use_mock=True):
         create_sample_pdf()
     
     try:
-        from gre_tutor.core.pipeline import GREMathPipeline
+        from sat_tutor.core.pipeline import GREMathPipeline
         
         pipeline = GREMathPipeline(
             use_mock=use_mock,
