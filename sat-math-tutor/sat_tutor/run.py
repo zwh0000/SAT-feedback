@@ -28,31 +28,31 @@ def parse_args():
         epilog="""
 Examples:
   # SAT Math (default, uses vision model)
-  python -m gre_tutor.run --pdf input.pdf --mode diagnose
+  python -m sat_tutor.run --pdf input.pdf --mode diagnose
   
   # SAT English (uses OCR + text model)
-  python -m gre_tutor.run --pdf input.pdf --subject english --mode diagnose
+  python -m sat_tutor.run --pdf input.pdf --subject english --mode diagnose
   
   # Transcribe only
-  python -m gre_tutor.run --pdf input.pdf --mode transcribe_only
+  python -m sat_tutor.run --pdf input.pdf --mode transcribe_only
   
   # Transcribe + Solve
-  python -m gre_tutor.run --pdf input.pdf --mode solve
+  python -m sat_tutor.run --pdf input.pdf --mode solve
   
   # Preset user answers file (skip answer input selection)
-  python -m gre_tutor.run --pdf input.pdf --answers user.json --mode diagnose
+  python -m sat_tutor.run --pdf input.pdf --answers user.json --mode diagnose
   
   # Preset correct answers file (skip solve selection)
-  python -m gre_tutor.run --pdf input.pdf --correct-answers correct.json --mode diagnose
+  python -m sat_tutor.run --pdf input.pdf --correct-answers correct.json --mode diagnose
   
   # Non-interactive mode (fully use CLI arguments)
-  python -m gre_tutor.run --pdf input.pdf --correct-answers correct.json --answers user.json --no-interactive
+  python -m sat_tutor.run --pdf input.pdf --correct-answers correct.json --answers user.json --no-interactive
   
   # Specify page range
-  python -m gre_tutor.run --pdf input.pdf --pages "1-3,5" --mode diagnose
+  python -m sat_tutor.run --pdf input.pdf --pages "1-3,5" --mode diagnose
   
   # Offline Mock mode
-  python -m gre_tutor.run --pdf input.pdf --no-llm --mode transcribe_only
+  python -m sat_tutor.run --pdf input.pdf --no-llm --mode transcribe_only
         """
     )
     

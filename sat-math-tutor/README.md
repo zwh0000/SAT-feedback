@@ -92,23 +92,23 @@ OPENAI_MODEL_TEXT=gpt-4o-mini
 
 ### SAT Math - Full Diagnosis
 ```bash
-python -m gre_tutor.run --pdf data/samples/Linear_Equations.pdf --subject math --mode diagnose
+python -m sat_tutor.run --pdf data/samples/Linear_Equations.pdf --subject math --mode diagnose
 ```
 (Replace `data/samples/Linear_Equations.pdf` with your own PDF file path)
 
 ### SAT English - Full Diagnosis
 ```bash
-python -m gre_tutor.run --pdf data/samples/Cross.pdf --subject english --mode diagnose
+python -m sat_tutor.run --pdf data/samples/Cross.pdf --subject english --mode diagnose
 ```
 (Replace `data/samples/Cross.pdf` with your own PDF file path)
 
 ### With Preset Correct Answers (Skip LLM Solving)
 ```bash
 # Math
-python -m gre_tutor.run --pdf data/samples/Linear_Equations.pdf --subject math --correct-answers data/samples/correct_answers_simple.json --mode diagnose
+python -m sat_tutor.run --pdf data/samples/Linear_Equations.pdf --subject math --correct-answers data/samples/correct_answers_simple.json --mode diagnose
 
 # English
-python -m gre_tutor.run --pdf data/samples/Cross.pdf --subject english --correct-answers data/samples/correct_answers_simple.json --mode diagnose
+python -m sat_tutor.run --pdf data/samples/Cross.pdf --subject english --correct-answers data/samples/correct_answers_simple.json --mode diagnose
 ```
 (Replace file paths with your own PDF and answer JSON files)
 
@@ -242,7 +242,7 @@ and consider the deeper implications of research findings.
 When you run the diagnosis command:
 
 ```bash
-python -m gre_tutor.run --pdf input.pdf --mode diagnose
+python -m sat_tutor.run --pdf input.pdf --mode diagnose
 ```
 
 After entering your answers, you'll see:
@@ -372,65 +372,65 @@ gre-math-tutor/
 
 ```bash
 # Full pipeline: Extract + Solve + Diagnose (interactive answer input)
-python -m gre_tutor.run --pdf input.pdf --mode diagnose
+python -m sat_tutor.run --pdf input.pdf --mode diagnose
 
 # Transcribe only (extract questions)
-python -m gre_tutor.run --pdf input.pdf --mode transcribe_only
+python -m sat_tutor.run --pdf input.pdf --mode transcribe_only
 
 # Transcribe + Solve (no diagnosis)
-python -m gre_tutor.run --pdf input.pdf --mode solve
+python -m sat_tutor.run --pdf input.pdf --mode solve
 ```
 
 ### Subject Selection
 
 ```bash
 # GRE/SAT Math (default) - uses Vision LLM
-python -m gre_tutor.run --pdf math_test.pdf --subject math
+python -m sat_tutor.run --pdf math_test.pdf --subject math
 
 # SAT English - uses OCR + Text LLM
-python -m gre_tutor.run --pdf english_test.pdf --subject english
+python -m sat_tutor.run --pdf english_test.pdf --subject english
 ```
 
 ### Page Selection
 
 ```bash
 # Process specific pages
-python -m gre_tutor.run --pdf input.pdf --pages "1-3,5,7"
+python -m sat_tutor.run --pdf input.pdf --pages "1-3,5,7"
 
 # Process all pages (default)
-python -m gre_tutor.run --pdf input.pdf --pages all
+python -m sat_tutor.run --pdf input.pdf --pages all
 ```
 
 ### Answer Input Methods
 
 ```bash
 # Interactive input (default)
-python -m gre_tutor.run --pdf input.pdf --mode diagnose
+python -m sat_tutor.run --pdf input.pdf --mode diagnose
 
 # Use preset user answers file
-python -m gre_tutor.run --pdf input.pdf --answers user_answers.json --mode diagnose
+python -m sat_tutor.run --pdf input.pdf --answers user_answers.json --mode diagnose
 
 # Use correct answers file (skip LLM solving)
-python -m gre_tutor.run --pdf input.pdf --correct-answers correct.json --mode diagnose
+python -m sat_tutor.run --pdf input.pdf --correct-answers correct.json --mode diagnose
 
 # Both preset files (fully automated)
-python -m gre_tutor.run --pdf input.pdf --correct-answers correct.json --answers user.json --no-interactive
+python -m sat_tutor.run --pdf input.pdf --correct-answers correct.json --answers user.json --no-interactive
 ```
 
 ### Advanced Options
 
 ```bash
 # Higher image resolution (better OCR)
-python -m gre_tutor.run --pdf input.pdf --dpi 400
+python -m sat_tutor.run --pdf input.pdf --dpi 400
 
 # Custom output directory
-python -m gre_tutor.run --pdf input.pdf --outdir my_outputs/
+python -m sat_tutor.run --pdf input.pdf --outdir my_outputs/
 
 # Offline mode (mock data, no API needed)
-python -m gre_tutor.run --pdf input.pdf --no-llm --mode transcribe_only
+python -m sat_tutor.run --pdf input.pdf --no-llm --mode transcribe_only
 
 # Non-interactive mode (use all CLI arguments)
-python -m gre_tutor.run --pdf input.pdf --no-interactive --correct-answers correct.json
+python -m sat_tutor.run --pdf input.pdf --no-interactive --correct-answers correct.json
 ```
 
 ### Student Simulation
@@ -438,7 +438,7 @@ python -m gre_tutor.run --pdf input.pdf --no-interactive --correct-answers corre
 During interactive mode, you can choose to simulate a student:
 
 ```bash
-python -m gre_tutor.run --pdf input.pdf --mode diagnose
+python -m sat_tutor.run --pdf input.pdf --mode diagnose
 ```
 
 Then select option `[3] Simulate student` when prompted for answer input method.
